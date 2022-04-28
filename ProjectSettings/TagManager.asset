@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags: []
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Board
+  - Slot
+  - Stock
+  - Piece
+  - 
+  - NonPermission
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Board
+    uniqueID: 2532026129
+    locked: 0
+  - name: Slot
+    uniqueID: 3495501409
+    locked: 0
+  - name: Stock
+    uniqueID: 3764707165
+    locked: 0
+  - name: Piece
+    uniqueID: 1918131281
+    locked: 0
+  - name: NonPermission
+    uniqueID: 926407669
+    locked: 0
