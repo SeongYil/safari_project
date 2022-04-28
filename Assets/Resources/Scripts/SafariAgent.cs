@@ -46,13 +46,20 @@ namespace Assets.Resources.Scripts
 
 			behaviorParameters.InferenceDevice = Unity.MLAgents.Policies.InferenceDevice.GPU;
 
+			
+
+
 			if(name.Contains("Black"))
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
+				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/BlackAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 			}
             else
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
+				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/WhiteAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
 			}
 
 
