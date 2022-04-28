@@ -59,7 +59,7 @@ namespace Assets.Resources.Scripts
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
 				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/WhiteAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 			}
 
 

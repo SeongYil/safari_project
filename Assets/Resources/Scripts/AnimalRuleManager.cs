@@ -371,35 +371,14 @@ namespace Assets.Resources.Scripts
 
         public void SetReward(EGameState actionResult)
         {
-            /*
-             *기린을 잡았을 때 AddReward(+0.3f)
-                기린이 잡혔을 때 AddReward(-0.3f)
-                코끼리를 잡았을 때 AddReward(+0.2f)
-                코끼리가 잡혔을 때 AddReward(-0.2f)
-                병아리를 잡았을 때 AddReward(+0.1f)
-                병아리가 잡혔을 때 AddReward(-0.1f)
-                닭이 잡혔을 때 AddReward(+0.35f)
-                닭을 잡았을 때 AddReward(-0.35f)
-                사자를 잡았을 때 SetReward(+1.0f) 승리
-                사자가 잡혔을 때 SetReward(-1.0f) 패배
-                잡은 병아리를 보드에 놓았을 때 AddReward(+0.1f)
-                잡은 코끼리를 보드에 놓았을 때 AddReward(+0.2f)
-                잡은 기린을 보드에 놓았을 때 AddReward(+0.3f)
-                사자가 y축으로 전진했을 때 SetReward(+0.1f)
-                사자가 y축으로 후퇴했을 때 SetReward(-0.1f)
-                사자가 끝까지 전진했을 때 SetReward(+1.0f)
-                게임에서 승리했을 때 SetReward(+1.0f)
-                게임에서 패배했을 때 SetReward(-1.0f)
-                병아리가 끝까지 갔을 때  AddReward(+0.25f) 
-            */
             SharedDataType.EColor eOpponent = SharedDataType.EColor.Count;
             if (eCurrentTurn == SharedDataType.EColor.White)
             {
-                eOpponent = SharedDataType.EColor.White;
-            }
-            else
-            {
                 eOpponent = SharedDataType.EColor.Black;
+            }
+            else if (eCurrentTurn == SharedDataType.EColor.Black)
+            {
+                eOpponent = SharedDataType.EColor.White;
             }
 
 
@@ -407,51 +386,51 @@ namespace Assets.Resources.Scripts
             {
                 case EGameState.Promotion:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.25f);
+                        Agent[eCurrentTurn].AddReward(+0.025f);
                         break;
                     }
                 case EGameState.OnBoardGiraph:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.3f);
+                        Agent[eCurrentTurn].AddReward(+0.03f);
                         break;
                     }
                 case EGameState.OnBoardElephant:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.2f);
+                        Agent[eCurrentTurn].AddReward(+0.02f);
                         break;
                     }
                 case EGameState.OnBoardChick:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.1f);
+                        Agent[eCurrentTurn].AddReward(+0.01f);
                         break;
                     }
                 case EGameState.CaptureChick:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.1f);
-                        Agent[eOpponent].AddReward(-0.1f);
+                        Agent[eCurrentTurn].AddReward(+0.01f);
+                        Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.CaptureChicken:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.35f);
-                        Agent[eOpponent].AddReward(-0.35f);
+                        Agent[eCurrentTurn].AddReward(+0.035f);
+                        Agent[eOpponent].AddReward(-0.035f);
                         break;
                     }
                 case EGameState.CaptureElephant:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.2f);
-                        Agent[eOpponent].AddReward(-0.2f);
+                        Agent[eCurrentTurn].AddReward(+0.02f);
+                        Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
                 case EGameState.CaptureGiraph:
                     {
-                        Agent[eCurrentTurn].AddReward(+0.3f);
-                        Agent[eOpponent].AddReward(-0.3f);
+                        Agent[eCurrentTurn].AddReward(+0.03f);
+                        Agent[eOpponent].AddReward(-0.03f);
                         break;
                     }
                 case EGameState.Win:
                     {
-                        Agent[eCurrentTurn].SetReward(+1.0f);
+                        Agent[eCurrentTurn].SetReward(1.0f);
                         Agent[eOpponent].SetReward(-1.0f);
 
                         Agent[eCurrentTurn].EndEpisode();
@@ -464,6 +443,7 @@ namespace Assets.Resources.Scripts
                 case EGameState.Continue:
                     {
                         //일반
+                        Agent[eCurrentTurn].SetReward(-0.01f);
                         break;
                     }
                 default:
