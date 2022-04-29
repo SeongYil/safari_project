@@ -22,7 +22,7 @@ namespace Assets.Resources.Scripts
 
 		private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
-		private int AllActionSize = 361;
+		private int AllActionSize = 360;
 		private int AllObservationSize = 18;
 		
 
@@ -52,14 +52,14 @@ namespace Assets.Resources.Scripts
 			if(name.Contains("Black"))
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
-				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/BlackAgent");
+				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/100/BlackAgent");
 				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 				//isRandomAgent = true;
 			}
             else
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
-				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/WhiteAgent");
+				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/100/WhiteAgent");
 				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 			}
 
@@ -94,36 +94,24 @@ namespace Assets.Resources.Scripts
 		public override void OnActionReceived(ActionBuffers actionBuffers)
 		{
 			
-			//내 턴이 아니면 액션하지 않음
-			if(ruleManager.eCurrentTurn != this.eColor)
-            {
-				return;
-            }
-
 
 			int action = actionBuffers.DiscreteActions[0];
 
-			if(action == 360)
-            {
-				return;
-            }
+			//if(isRandomAgent == false)
+            //{
+			ruleManager.SetActionMove(action);
+			//}
+   //         else
+   //         {
+			//	Dictionary<double, double> allAvailableAction = ruleManager.GetAvailableAllActions();
 
+			//	List<KeyValuePair<double,double>> listAvailable = allAvailableAction.ToList();
 
-			if(isRandomAgent == false)
-            {
-				ruleManager.SetActionMove(action);
-			}
-            else
-            {
-				Dictionary<double, double> allAvailableAction = ruleManager.GetAvailableAllActions();
+			//	int randomAction = UnityEngine.Random.Range(0, listAvailable.Count);
 
-				List<KeyValuePair<double,double>> listAvailable = allAvailableAction.ToList();
+			//	ruleManager.SetActionMove(listAvailable[randomAction].Key);
 
-				int randomAction = UnityEngine.Random.Range(0, listAvailable.Count);
-
-				ruleManager.SetActionMove(listAvailable[randomAction].Key);
-
-			}
+			//}
 
 			
 
@@ -138,12 +126,6 @@ namespace Assets.Resources.Scripts
 				actionMask.SetActionEnabled(0, i, false);
 			}
 
-
-			if (ruleManager.eCurrentTurn != this.eColor)
-			{
-				actionMask.SetActionEnabled(0, 360, true);
-				return;
-			}
 
 			Dictionary<double, double> allAction = ruleManager.GetAvailableAllActions();
 

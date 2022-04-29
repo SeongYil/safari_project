@@ -13,8 +13,10 @@ namespace Assets.Resources.Scripts
         //This is Main Camera in the Scene
         Camera m_MainCamera;
 
-
+        [System.NonSerialized]
         public Material DefaultLineMaterial;
+
+        [System.NonSerialized]
         public Material DefaultSpriteMaterial;
 
 
@@ -29,6 +31,10 @@ namespace Assets.Resources.Scripts
             instance = this;
 
             PieceManager.CreatePieceManager();
+
+            
+            DefaultLineMaterial = UnityEngine.Resources.Load<Material>("Material/DefaultLine");
+            DefaultSpriteMaterial = UnityEngine.Resources.Load<Material>("Material/DefaultSprite");
         }
 
         public Sprite GetSpriteNumber(int number)

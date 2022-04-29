@@ -59,12 +59,17 @@ namespace Assets.Resources.Scripts
 
             SafariAgent agent = agentObj.AddComponent<SafariAgent>();
             agent.InitializeAgent(this, objectName, colorType);
-            agentObj.AddComponent<Unity.MLAgents.DecisionRequester>();
+            //agentObj.AddComponent<Unity.MLAgents.DecisionRequester>();
 
             
 
             return agent;
         }
+
+        //private void Update()
+        //{
+        //    Agent[eCurrentTurn].RequestDecision();
+        //}
 
         public void Initialize(Environment animalGame)
         {
@@ -100,6 +105,9 @@ namespace Assets.Resources.Scripts
         // Update is called once per frame
         void Update()
         {
+
+            Agent[eCurrentTurn].RequestDecision();
+
             //해당 피스를 새로 만들어주고 크기는 원래대로 
             //마우스 포지션에 붙게함
             if (SelectedPiece != null)
@@ -166,30 +174,18 @@ namespace Assets.Resources.Scripts
             }
 
 
-            //start가 좌표가 아닌 경우 해당 턴의 stock을 처리하는 
-            //함수 콜
             int[,] boardState = env.GetCurrentBoardState();
-
-            double[,] boardStateDouble = new double[4,3];
-
-            for(int y = 0; y < 4; ++y)
-            {
-                for(int x = 0; x < 3; ++x)
-                {
-                    boardStateDouble[y, x] = boardState[y, x];
-                }
-            }
 
             List<(string start, string dest)> test = new List<(string start, string dest)>();
 
             foreach( KeyValuePair<double, double> key in GetAvailableAllActions())
             {
-                test.Add(Decoder.action_to_stringTuple(key.Value, boardStateDouble));
+                test.Add(Decoder.action_to_stringTuple(key.Value, boardState));
             }
 
 
 
-            (string start, string dest) pos = Decoder.action_to_stringTuple(action, boardStateDouble);
+            (string start, string dest) pos = Decoder.action_to_stringTuple(action, boardState);
 
             EGameState actionResult = SetActionMove(pos.start, pos.dest);
 

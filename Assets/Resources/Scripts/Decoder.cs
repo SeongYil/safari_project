@@ -130,7 +130,7 @@ namespace Assets.Resources.Scripts
             }
         }
 
-        public static (string, string) action_to_stringTuple(double action_num, double[,] board)
+        public static (string, string) action_to_stringTuple(double action_num, int[,] board)
         {
 
 
@@ -144,7 +144,7 @@ namespace Assets.Resources.Scripts
             {
                 (double, double) from_pos = (Math.Truncate((double)move[0] / 3), move[0] % 3);
                 (double, double) to_pos = (Math.Truncate((double)move[2] / 3), move[2] % 3);
-                double kind = board[(int)to_pos.Item1, (int)to_pos.Item2];
+                int kind = board[(int)to_pos.Item1, (int)to_pos.Item2];
                 string[] slist = "L E G P C".Split(' ');
                 string ch = "";
                 if (kind == 0)
