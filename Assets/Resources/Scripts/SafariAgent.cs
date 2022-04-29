@@ -52,14 +52,14 @@ namespace Assets.Resources.Scripts
 			if(name.Contains("Black"))
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
-				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/BlackAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
+				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/BlackAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
 			}
             else
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
-				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/WhiteAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
+				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/WhiteAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
 			}
 
 
@@ -125,18 +125,20 @@ namespace Assets.Resources.Scripts
 
 		public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
 		{
-			//내 턴이 아니면 액션하지 않음
+
+
 			if (ruleManager.eCurrentTurn != this.eColor)
 			{
 				return;
 			}
 
-			Dictionary<double, double> allAction = ruleManager.GetAvailableAllActions();
-
-			for(int i = 0; i < AllActionSize; ++i)
-            {
+			//내 턴이 아니면 액션하지 않음
+			for (int i = 0; i < AllActionSize; ++i)
+			{
 				actionMask.SetActionEnabled(0, i, false);
 			}
+
+			Dictionary<double, double> allAction = ruleManager.GetAvailableAllActions();
 
 			foreach( KeyValuePair<double, double> availableAction in allAction )
             {

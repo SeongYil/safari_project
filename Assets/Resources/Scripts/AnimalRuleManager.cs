@@ -218,6 +218,7 @@ namespace Assets.Resources.Scripts
             OnBoardGiraph,
             OnBoardElephant,
             Promotion,
+            ThreatLion,
             Win,
         }
 
@@ -363,6 +364,16 @@ namespace Assets.Resources.Scripts
                     }
             }
 
+            if (CheckRangeOpponentLion(targetSlotScript) == true)
+            {
+                result = EGameState.ThreatLion;
+            }
+
+
+
+
+
+
 
             return result;
 
@@ -438,6 +449,12 @@ namespace Assets.Resources.Scripts
 
                         ResetGame();
 
+                        break;
+                    }
+                case EGameState.ThreatLion:
+                    {
+                        Agent[eCurrentTurn].SetReward(0.1f);
+                        Agent[eOpponent].SetReward(-0.1f);
                         break;
                     }
                 case EGameState.Continue:
@@ -904,6 +921,48 @@ namespace Assets.Resources.Scripts
             {
                 return true;
             }
+        }
+
+
+        //해당 슬롯의 피스의 사정거리내에 상대방 라이언이 있는지 
+        public bool CheckRangeOpponentLion(BoardSlot slot)
+        {
+            int pieceID = slot.GetPiece().pieceID;
+            SharedDataType.EColor color = slot.GetPiece().eColor;
+            int board_x = slot.X;
+            int board_y = slot.Y;
+
+            //현재 위치에서 이동 할 수 있는 좌표들 얻어오기 
+            List<(int Y, int X)> allowed_position = GetPieceMovePosition(board_x, board_y, pieceID);
+
+
+            //현재 위치에서 해당 기물의 이동 경로만 밝게 표현
+            for (int i = 0; i < allowed_position.Count; ++i)
+            {
+                //갈 수 있는지
+                if (CheckMove(color, allowed_position[i].X, allowed_position[i].Y) == false)
+                {
+                    continue;
+                }
+
+                //피스가 있는가?
+                BoardSlot targetSlotScript = env.BoardSlots[allowed_position[i].Y, allowed_position[i].X];
+                if( targetSlotScript.HasPiece() == false )
+                {
+                    continue;
+                }
+
+
+                if ( targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2 )
+                {
+                    return true;
+                }
+
+
+            }
+
+
+            return false;
         }
 
         //특정 기물을 잡았을 때 이동 가능 경로 보여주기
