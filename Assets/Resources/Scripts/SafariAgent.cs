@@ -22,7 +22,7 @@ namespace Assets.Resources.Scripts
 
 		private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
-		private int AllActionSize = 360;
+		private int AllActionSize = 361;
 		private int AllObservationSize = 18;
 		
 
@@ -52,14 +52,15 @@ namespace Assets.Resources.Scripts
 			if(name.Contains("Black"))
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
-				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/BlackAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/BlackAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
+				//isRandomAgent = true;
 			}
             else
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
-				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/WhiteAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/Black_200/WhiteAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 			}
 
 
@@ -102,6 +103,12 @@ namespace Assets.Resources.Scripts
 
 			int action = actionBuffers.DiscreteActions[0];
 
+			if(action == 360)
+            {
+				return;
+            }
+
+
 			if(isRandomAgent == false)
             {
 				ruleManager.SetActionMove(action);
@@ -125,17 +132,17 @@ namespace Assets.Resources.Scripts
 
 		public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
 		{
-
-
-			if (ruleManager.eCurrentTurn != this.eColor)
-			{
-				return;
-			}
-
 			//내 턴이 아니면 액션하지 않음
 			for (int i = 0; i < AllActionSize; ++i)
 			{
 				actionMask.SetActionEnabled(0, i, false);
+			}
+
+
+			if (ruleManager.eCurrentTurn != this.eColor)
+			{
+				actionMask.SetActionEnabled(0, 360, true);
+				return;
 			}
 
 			Dictionary<double, double> allAction = ruleManager.GetAvailableAllActions();

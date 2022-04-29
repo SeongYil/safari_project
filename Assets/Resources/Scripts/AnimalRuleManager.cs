@@ -123,9 +123,9 @@ namespace Assets.Resources.Scripts
 
         public void ResetGame()
         {
+            eCurrentTurn = SharedDataType.EColor.White;
             GameObject envObj = env.GetEnvironmentObj();
             Destroy(envObj);
-
             GameObject environment = new GameObject("Environment");
             environment.transform.parent = transform;
             environment.transform.localPosition = new Vector3(0, 0, 0);
@@ -135,7 +135,7 @@ namespace Assets.Resources.Scripts
 
             env.Initialize(this, environment.transform);
 
-            eCurrentTurn = SharedDataType.EColor.White;
+            
 
 
         }
@@ -193,7 +193,14 @@ namespace Assets.Resources.Scripts
 
             EGameState actionResult = SetActionMove(pos.start, pos.dest);
 
+   
+
             SetReward(actionResult);
+
+            if (actionResult == EGameState.Win)
+            {
+                return;
+            }
 
             ChangeTurn();
 
@@ -309,11 +316,14 @@ namespace Assets.Resources.Scripts
                         {
                             //³¡±îÁö °¬À½
                             result = EGameState.Win;
+                            return result;
                         }
+
                         if (target_pos.Y == 0 && startPiece.pieceID == Environment.L1)
                         {
                             //³¡±îÁö °¬À½
                             result = EGameState.Win;
+                            return result;
                         }
 
 
@@ -364,7 +374,7 @@ namespace Assets.Resources.Scripts
                     }
             }
 
-            if (CheckRangeOpponentLion(targetSlotScript) == true)
+            if (CheckRangeOpponentLion(targetSlotScript) == true && result == EGameState.Continue)
             {
                 result = EGameState.ThreatLion;
             }
