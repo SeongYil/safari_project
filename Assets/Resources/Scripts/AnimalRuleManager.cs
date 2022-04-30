@@ -216,6 +216,7 @@ namespace Assets.Resources.Scripts
             OnBoardElephant,
             Promotion,
             ThreatLion,
+            StupidMove,
             Win,
         }
 
@@ -366,10 +367,43 @@ namespace Assets.Resources.Scripts
                     }
             }
 
+            //내기물이 사자인가? 
+            if (targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2)
+            {
+                //사자인데, 상대방 기물의 사정거리에 내 사자 있는 경우 
+                foreach (BoardSlot slot in env.BoardSlots)
+                {
+                    if (slot.GetPiece() == null)
+                    {
+                        continue;
+                    }
+
+                    if (slot.GetPiece().eColor != eCurrentTurn)
+                    {
+                        //해당 슬롯의 기물은 적군이다.
+                        //적군의 사정거리에 현재 나의 포지션이 있는가? 
+                        //피스의 모든 경로를 리턴하는 함수 GetPieceMovePosition
+
+                        Dictionary<(int Y, int X), (int Y, int X)> allowed_position = GetPieceMovePositionDict(slot.X, slot.Y, slot.GetPiece().pieceID);
+
+                        //있다면 스튜빗 무브를 리턴한다
+                        if (allowed_position.ContainsKey((targetSlotScript.Y, targetSlotScript.X)) == true)
+                        {
+                            return EGameState.StupidMove;
+                        }
+
+                    }
+                }
+
+
+            }
+
             if (CheckRangeOpponentLion(targetSlotScript) == true && result == EGameState.Continue)
             {
                 result = EGameState.ThreatLion;
+                return result;
             }
+
 
 
 
@@ -455,14 +489,24 @@ namespace Assets.Resources.Scripts
                     }
                 case EGameState.ThreatLion:
                     {
-                        Agent[eCurrentTurn].SetReward(0.1f);
-                        Agent[eOpponent].SetReward(-0.1f);
+                        Agent[eCurrentTurn].AddReward(0.1f);
+                        Agent[eOpponent].AddReward(-0.1f);
                         break;
                     }
                 case EGameState.Continue:
                     {
                         //일반
-                        Agent[eCurrentTurn].SetReward(-0.01f);
+                        Agent[eCurrentTurn].AddReward(-0.01f);
+                        break;
+                    }
+                case EGameState.StupidMove:
+                    {
+                        Agent[eCurrentTurn].SetReward(-1.0f);
+                        Agent[eOpponent].SetReward(0.0f);
+                        
+                        Agent[eCurrentTurn].EndEpisode();
+                        Agent[eOpponent].EndEpisode();
+
                         break;
                     }
                 default:
@@ -819,6 +863,35 @@ namespace Assets.Resources.Scripts
                     continue;
 
                 allowed_position.Add((moved_y_pos, moved_x_pos));
+            }
+
+            return allowed_position;
+        }
+
+
+        public Dictionary<(int Y, int X) , (int Y, int X)> GetPieceMovePositionDict(int start_x, int start_y, int pieceID)
+        {
+            (int dirY, int dirX)[] allowed_moves = ALLOWED_MOVES[pieceID];
+
+
+            //현재 위치에서 이동 할 수 있는 좌표들 얻어오기 
+            Dictionary<(int Y, int X), (int Y, int X)> allowed_position = new Dictionary<(int Y, int X), (int Y, int X)>();
+
+            for (int i = 0; i < allowed_moves.Length; ++i)
+            {
+                int moved_x_pos = start_x + allowed_moves[i].dirX;
+
+                //x 좌표 유효
+                if (moved_x_pos < 0 || moved_x_pos >= Environment.X)
+                    continue;
+
+                int moved_y_pos = start_y + allowed_moves[i].dirY;
+
+                //y좌표 유효
+                if (moved_y_pos < 0 || moved_y_pos >= Environment.Y)
+                    continue;
+
+                allowed_position[(moved_y_pos, moved_x_pos)] = (moved_y_pos, moved_x_pos);
             }
 
             return allowed_position;
