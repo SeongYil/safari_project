@@ -8,23 +8,31 @@ namespace Assets.Resources.Scripts
 {
     public class Decoder
     {
+        static Dictionary<string, int> stock_kinds = new Dictionary<string, int>() { { "E", 0 }, { "G", 1 }, { "P", 2 } };
+
+        static string num1 = "123";
+        static string string1 = "abcd";
+        static int board_size = 12;
+
+        static Dictionary<string, double> PositionStrToIndex = new Dictionary<string, double>()
+        {
+            {"1a", 0 }, {"2a", 1 }, {"3a", 2},
+            {"1b", 3 }, {"2b", 4 }, {"3b", 5},
+            {"1c", 6 }, {"2c", 7 }, {"3c", 8},
+            {"1d", 9 }, {"2d", 10 }, {"3d", 11},
+        };
 
         // 문자를 넣으면 숫자ㄹ 바꾸는 함수 (보조 함수)
-        public static double convert_position_string_to_pos_index(string pos_str)
-        {
-            string str = "abcd";
-            pos_str = pos_str.ToLower();
-            double col = Double.Parse(pos_str[0] + "") - 1;
-            double row = str.IndexOf(pos_str[1]);
-            return row * 3 + col;
-        }
+        //public static double convert_position_string_to_pos_index(string pos_str)
+        //{
+        //    pos_str = pos_str.ToLower();
+        //    double col = Double.Parse(pos_str[0] + "") - 1;
+        //    double row = string1.IndexOf(pos_str[1]);
+        //    return row * 3 + col;
+        //}
         // 문자를 넣으면 숫자ㄹ 바꾸는 함수
         public static double encode_to_action_index(string input1, string input2, double to_play)
         {
-            Dictionary<string, int> stock_kinds = new Dictionary<string, int>();
-            stock_kinds.Add("E", 0);
-            stock_kinds.Add("G", 1);
-            stock_kinds.Add("P", 2);
             double board_size = 12;
             double action;
             double from_stock = -1;
@@ -37,9 +45,9 @@ namespace Assets.Resources.Scripts
             }
             else
             {
-                from_board = convert_position_string_to_pos_index(input1);
+                from_board = PositionStrToIndex[input1];
             }
-            to_board = convert_position_string_to_pos_index(input2);
+            to_board = PositionStrToIndex[input2];
             if (from_stock == -1)
             {
                 action = from_board;
@@ -57,13 +65,9 @@ namespace Assets.Resources.Scripts
         // 숫자와, 보드판 상태를 넣으면 문자로 바꾸는 함수 (보조 함수)
         public static (double, double, double, double) decode_from_action_index(double action)
         {
-            int board_size = 12;
-            double promote;
-            double to_board;
-            //Debug.Assert(0 <= action && action < (board_size + 3) * board_size * 2);
-            promote = action % 2;
+            double promote = action % 2;
             double new_action = Math.Truncate((double)action / 2);
-            to_board = new_action % board_size;
+            double to_board = new_action % board_size;
             new_action = Math.Truncate((double)new_action / board_size);
             double from_board;
             double from_stock;
@@ -79,113 +83,57 @@ namespace Assets.Resources.Scripts
             }
             return (from_board, from_stock, to_board, promote);
         }
-        // 숫자와, 보드판 상태를 넣으면 문자로 바꾸는 함수
-        public static string action_to_string(double action_num, double[,] board)
-        {
 
-
-            List<double> move = new List<double>();
-            (double, double, double, double) tu1 = decode_from_action_index(action_num);
-            move.Add(tu1.Item1);
-            move.Add(tu1.Item2);
-            move.Add(tu1.Item3);
-            move.Add(tu1.Item4);
-            if (move[0] != -1)
-            {
-                (double, double) from_pos = (Math.Truncate((double)move[0] / 3), move[0] % 3);
-                (double, double) to_pos = (Math.Truncate((double)move[2] / 3), move[2] % 3);
-                double kind = board[(int)to_pos.Item1, (int)to_pos.Item2];
-                string[] slist = "L E G P C".Split(' ');
-                string ch = "";
-                if (kind == 0)
-                {
-                    ch = " ";
-                }
-                else
-                {
-                    int idx = (int)(kind - 1) % 5;
-                    ch = slist[idx];
-                }
-                string num1 = "123";
-                string string1 = "abcd";
-                string pos_from = num1[(int)from_pos.Item2] + "";
-                pos_from += string1[(int)from_pos.Item1];
-                pos_from += num1[(int)to_pos.Item2];
-                pos_from += string1[(int)to_pos.Item1];
-                pos_from += ch;
-                return pos_from;
-            }
-            else
-            {
-                (double, double) to_pos = (Math.Truncate((double)move[2] / 3), move[2] % 3);
-                string[] slist = "E G P".Split(' ');
-                int idx = (int)move[1];
-                string ch = slist[idx];
-                string num1 = "123";
-                string string1 = "abcd";
-                string pos_to = num1[(int)to_pos.Item2] + "";
-                pos_to += string1[(int)to_pos.Item1];
-                pos_to += ch;
-                return "->" + pos_to;
-            }
-        }
-
+        static string[] PieceStringID_Five = new string[5] { "L", "E", "G", "P","C"};
+        static string[] PieceStringID_Three = new string[3] { "E", "G", "P" };
         public static (string, string) action_to_stringTuple(double action_num, int[,] board)
         {
 
 
-            List<double> move = new List<double>();
-            (double, double, double, double) tu1 = decode_from_action_index(action_num);
-            move.Add(tu1.Item1);
-            move.Add(tu1.Item2);
-            move.Add(tu1.Item3);
-            move.Add(tu1.Item4);
-            if (move[0] != -1)
+            //List<double> move = new List<double>();
+            (double i0, double i1, double i2, double i3) move = decode_from_action_index(action_num);
+            //move.Add(tu1.Item1);
+            //move.Add(tu1.Item2);
+            //move.Add(tu1.Item3);
+            //move.Add(tu1.Item4);
+            if (move.i0 != -1)
             {
-                (double, double) from_pos = (Math.Truncate((double)move[0] / 3), move[0] % 3);
-                (double, double) to_pos = (Math.Truncate((double)move[2] / 3), move[2] % 3);
-                int kind = board[(int)to_pos.Item1, (int)to_pos.Item2];
-                string[] slist = "L E G P C".Split(' ');
-                string ch = "";
-                if (kind == 0)
-                {
-                    ch = " ";
-                }
-                else
-                {
-                    int idx = (int)(kind - 1) % 5;
-                    ch = slist[idx];
-                }
-                string num1 = "123";
-                string string1 = "abcd";
-                string pos_start= num1[(int)from_pos.Item2].ToString();
-                pos_start += string1[(int)from_pos.Item1];
+                (double, double) from_pos = (Math.Truncate((double)move.i0 / 3), move.i0 % 3);
+                (double, double) to_pos = (Math.Truncate((double)move.i2 / 3), move.i2 % 3);
 
-                string pos_dest = num1[(int)to_pos.Item2].ToString();
-                pos_dest += string1[(int)to_pos.Item1];
-                //pos_from += ch;
+                //string pos_start= num1[(int)from_pos.Item2].ToString();
+                //pos_start += string1[(int)from_pos.Item1];
+                int from_y = (int)from_pos.Item1;
+                int from_x = (int)from_pos.Item2;
+
+
+                string pos_start = GameManager.intPosToStringPos[(from_y, from_x)];
+
+                //string pos_dest = num1[(int)to_pos.Item2].ToString();
+                //pos_dest += string1[(int)to_pos.Item1];
+
+                int to_y = (int)to_pos.Item1;
+                int to_x = (int)to_pos.Item2;
+
+                string pos_dest = GameManager.intPosToStringPos[(to_y, to_x)];
 
                 return (pos_start, pos_dest);
-
-                //return pos_from;
             }
             else
             {
-                (double, double) to_pos = (Math.Truncate((double)move[2] / 3), move[2] % 3);
-                string[] slist = "E G P".Split(' ');
-                int idx = (int)move[1];
-                string ch = slist[idx];
-                string num1 = "123";
-                string string1 = "abcd";
-                string pos_to = num1[(int)to_pos.Item2].ToString();
-                pos_to += string1[(int)to_pos.Item1];
-                //pos_to += ch;
-                //return "->" + pos_to;
+                (double, double) to_pos = (Math.Truncate((double)move.i2 / 3), move.i2 % 3);
+                //string[] slist = "E G P".Split(' ');
+                int idx = (int)move.i1;
+                string ch = PieceStringID_Three[idx];
+                //string pos_to = num1[(int)to_pos.Item2].ToString();
+                //pos_to += string1[(int)to_pos.Item1];
 
-                string pos_start = ch;
-                string pos_dest = pos_to;
+                string pos_to = GameManager.intPosToStringPos[((int)to_pos.Item1, (int)to_pos.Item2)];
 
-                return (pos_start, pos_dest);
+                //string pos_start = ch;
+                //string pos_dest = pos_to;
+
+                return (ch, pos_to);
 
 
             }

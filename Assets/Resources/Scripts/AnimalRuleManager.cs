@@ -4,6 +4,7 @@ using UnityEngine;
 using Assets.Resources.Scripts;
 using System.Diagnostics;
 using System;
+using System.Text;
 //전체적인 룰을 전담하는 클래스
 
 
@@ -35,6 +36,8 @@ namespace Assets.Resources.Scripts
 
         Dictionary<int, (int dirY, int dirX)[]> ALLOWED_MOVES = null;
 
+
+
         private Piece SelectedPiece = null;
 
         private string start_pos_str = "";
@@ -43,7 +46,9 @@ namespace Assets.Resources.Scripts
 
 
 
+
         public SharedDataType.EColor eCurrentTurn = SharedDataType.EColor.White;
+
 
         public void InitializeAgent()
         {
@@ -59,17 +64,11 @@ namespace Assets.Resources.Scripts
 
             SafariAgent agent = agentObj.AddComponent<SafariAgent>();
             agent.InitializeAgent(this, objectName, colorType);
-            //agentObj.AddComponent<Unity.MLAgents.DecisionRequester>();
 
             
 
             return agent;
         }
-
-        //private void Update()
-        //{
-        //    Agent[eCurrentTurn].RequestDecision();
-        //}
 
         public void Initialize(Environment animalGame)
         {
@@ -94,8 +93,13 @@ namespace Assets.Resources.Scripts
 
 
 
+        }
+
+        private void Awake()
+        {
 
         }
+
         // Start is called before the first frame update
         void Start()
         {
@@ -176,20 +180,10 @@ namespace Assets.Resources.Scripts
 
             int[,] boardState = env.GetCurrentBoardState();
 
-            List<(string start, string dest)> test = new List<(string start, string dest)>();
-
-            foreach( KeyValuePair<double, double> key in GetAvailableAllActions())
-            {
-                test.Add(Decoder.action_to_stringTuple(key.Value, boardState));
-            }
-
-
-
             (string start, string dest) pos = Decoder.action_to_stringTuple(action, boardState);
 
             EGameState actionResult = SetActionMove(pos.start, pos.dest);
 
-   
 
             SetReward(actionResult);
 
@@ -235,7 +229,8 @@ namespace Assets.Resources.Scripts
                 actionType = EActionType.Stock;
             }
 
-            (int X, int Y) target_pos = GetPositionFromString(end);
+            //(int X, int Y) target_pos = GetPositionFromString(end);
+            (int Y, int X) target_pos = GameManager.StringPosToIntPos[end];
 
             BoardSlot targetSlotScript = env.BoardSlots[target_pos.Y, target_pos.X];   
 
@@ -246,7 +241,8 @@ namespace Assets.Resources.Scripts
                     {
                         Piece targetPiece = targetSlotScript.GetPiece();
                         //기존 위치에 있던 기물의 piece의 부모를 변경 
-                        (int X, int Y) start_pos = GetPositionFromString(start);
+                        //(int X, int Y) start_pos = GetPositionFromString(start);
+                        (int Y, int X) start_pos = GameManager.StringPosToIntPos[start];
                         BoardSlot startSlotScript = env.BoardSlots[start_pos.Y, start_pos.X];
 
                         Piece startPiece = startSlotScript.GetPiece();
@@ -494,9 +490,10 @@ namespace Assets.Resources.Scripts
         public void SelectSlot(BoardSlot slot)
         {
             //기물을 잡고 있는 상태라고 인지하기
-            start_pos_str = GetStringFromPosition(slot.X, slot.Y);
+            //start_pos_str = GetStringFromPosition(slot.X, slot.Y);
+            start_pos_str = GameManager.intPosToStringPos[(slot.Y, slot.X)];
 
-            
+
             SelectedPiece = Instantiate(slot.GetPiece());
             SelectedPiece.transform.parent = transform;
             SelectedPiece.gameObject.SetActive(true);
@@ -553,63 +550,6 @@ namespace Assets.Resources.Scripts
         }
 
 
-        public string GetStringFromPosition(int x, int y)
-        {
-            string y_str = (y).ToString();
-
-            if (y_str == "0")
-            {
-                y_str = "a";
-            }
-            else if (y_str == "1")
-            {
-                y_str = "b";
-            }
-            else if (y_str == "2")
-            {
-                y_str = "c";
-            }
-            else if (y_str == "3")
-            {
-                y_str = "d";
-            }
-
-            string x_str = (x + 1).ToString();
-
-            return x_str + y_str;
-        }
-        public (int, int) GetPositionFromString(string pos_str)
-        {
-
-            int x = int.Parse(pos_str[0].ToString());
-
-
-            string y_str = pos_str[1].ToString();
-
-            int y = -1;
-            if (y_str == "a")
-            {
-                y = 0;
-            }
-            else if (y_str == "b")
-            {
-                y = 1;
-            }
-            else if (y_str == "c")
-            {
-                y = 2;
-            }
-            else if (y_str == "d")
-            {
-                y = 3;
-            }
-
-
-
-            (int, int) pos = (x - 1, y);
-
-            return pos;
-        }
 
         public (int, int) GetStockFromString(string stock_str)
         {
@@ -651,8 +591,9 @@ namespace Assets.Resources.Scripts
             }
 
 
-            string target_pos_str = GetStringFromPosition(target_x, target_y);
-            
+            //string target_pos_str = GetStringFromPosition(target_x, target_y);
+            string target_pos_str = GameManager.intPosToStringPos[(target_y, target_x)];
+
 
             //현재 액션을 숫자 변환을 한다 
             double action = Decoder.encode_to_action_index(start_pos_str, target_pos_str, (double)eCurrentTurn);
@@ -773,9 +714,11 @@ namespace Assets.Resources.Scripts
                         //갈 수 있다 
 
                         //start , end
-                        string start_pos = GetStringFromPosition(x, y);
-                        string end_pos = GetStringFromPosition(allowed_position[i].X, allowed_position[i].Y);
+                        //string start_pos = GetStringFromPosition(x, y);
+                        string start_pos = GameManager.intPosToStringPos[(y, x)];
 
+                        //string end_pos = GetStringFromPosition(allowed_position[i].X, allowed_position[i].Y);
+                        string end_pos = GameManager.intPosToStringPos[(allowed_position[i].Y, allowed_position[i].X)];
 
 
                         double action = Decoder.encode_to_action_index(start_pos, end_pos, (double)eCurrentTurn);
@@ -818,9 +761,10 @@ namespace Assets.Resources.Scripts
 
                 foreach (BoardSlot slot in emptySlot)
                 {
-                    string end_pos = GetStringFromPosition(slot.X, slot.Y);
+                    //string end_pos = GetStringFromPosition(slot.X, slot.Y);
+                    string end_pos = GameManager.intPosToStringPos[(slot.Y, slot.X)];
 
-                    if(start_pos == "")
+                    if (start_pos == "")
                     {
                         continue;
                     }

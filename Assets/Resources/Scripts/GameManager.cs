@@ -25,6 +25,9 @@ namespace Assets.Resources.Scripts
 
         public int EnvironmentCount = 1;
 
+        static public Dictionary<(int y, int x), string> intPosToStringPos = new Dictionary<(int y, int x), string>();
+        static public Dictionary<string, (int y, int x)> StringPosToIntPos = new Dictionary<string, (int y, int x)>();
+
         private AnimalRuleManager ControllerEnvrionment = null;
         private void Awake()
         {
@@ -35,6 +38,38 @@ namespace Assets.Resources.Scripts
             
             DefaultLineMaterial = UnityEngine.Resources.Load<Material>("Material/DefaultLine");
             DefaultSpriteMaterial = UnityEngine.Resources.Load<Material>("Material/DefaultSprite");
+
+            intPosToStringPos.Add((0, 0), "1a");
+            intPosToStringPos.Add((0, 1), "2a");
+            intPosToStringPos.Add((0, 2), "3a");
+
+            intPosToStringPos.Add((1, 0), "1b");
+            intPosToStringPos.Add((1, 1), "2b");
+            intPosToStringPos.Add((1, 2), "3b");
+
+            intPosToStringPos.Add((2, 0), "1c");
+            intPosToStringPos.Add((2, 1), "2c");
+            intPosToStringPos.Add((2, 2), "3c");
+
+            intPosToStringPos.Add((3, 0), "1d");
+            intPosToStringPos.Add((3, 1), "2d");
+            intPosToStringPos.Add((3, 2), "3d");
+
+            StringPosToIntPos.Add("1a", (0, 0));
+            StringPosToIntPos.Add("2a", (0, 1));
+            StringPosToIntPos.Add("3a", (0, 2));
+
+            StringPosToIntPos.Add("1b", (1, 0));
+            StringPosToIntPos.Add("2b", (1, 1));
+            StringPosToIntPos.Add("3b", (1, 2));
+
+            StringPosToIntPos.Add("1c", (2, 0));
+            StringPosToIntPos.Add("2c", (2, 1));
+            StringPosToIntPos.Add("3c", (2, 2));
+
+            StringPosToIntPos.Add("1d", (3, 0));
+            StringPosToIntPos.Add("2d", (3, 1));
+            StringPosToIntPos.Add("3d", (3, 2));
         }
 
         public Sprite GetSpriteNumber(int number)
@@ -125,7 +160,9 @@ namespace Assets.Resources.Scripts
         {
             if (Input.GetMouseButtonDown(1))
             {
+                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
                 ControllerEnvrionment.ResetGame();
+                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
             }
         }
     }

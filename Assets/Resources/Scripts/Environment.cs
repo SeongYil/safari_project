@@ -246,7 +246,8 @@ namespace Assets.Resources.Scripts
             {
                 for (int x = 0; x < X; ++x)
                 {
-                    string pos_str = ruleManager.GetStringFromPosition(x, y);
+                    //string pos_str = ruleManager.GetStringFromPosition(x, y);
+                    string pos_str = GameManager.intPosToStringPos[(y, x)];
                     GameObject boardSlotObj = new GameObject(pos_str);
                     boardSlotObj.transform.parent = boardSlots.transform;
                     boardSlotObj.transform.localPosition = board.GetPieceRenderPositions(x, y); ;
