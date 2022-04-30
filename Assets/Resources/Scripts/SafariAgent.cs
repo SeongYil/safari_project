@@ -52,15 +52,16 @@ namespace Assets.Resources.Scripts
 			if(name.Contains("Black"))
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
-				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/100/BlackAgent");
+				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/SON/BlackAgent");
 				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 				//isRandomAgent = true;
 			}
             else
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
-				//behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/100/WhiteAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
+				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/SON/WhiteAgent");
+				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+
 			}
 
 
