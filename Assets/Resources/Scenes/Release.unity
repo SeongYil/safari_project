@@ -237,8 +237,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ReleaseMode: 1
   HumanColor: 0
-  BlackModel: {fileID: 5022602860645237092, guid: a1fd83d760457c24dade62f955006587, type: 3}
-  WhiteModel: {fileID: 5022602860645237092, guid: 36e1f61d7434d1345a00f468f7674a4f, type: 3}
+  BlackModel: {fileID: 5022602860645237092, guid: 64056250d643143488fb0de783a9d886, type: 3}
+  WhiteModel: {fileID: 5022602860645237092, guid: 6e76c1bfeaeff6c40a46b3f222842af6, type: 3}
   EnvironmentCount: 1
 --- !u!4 &1044961574
 Transform:

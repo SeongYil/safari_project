@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Model/SON3/BlackAgent.onnx.meta
+guid: 64056250d643143488fb0de783a9d886
+========
 guid: a1fd83d760457c24dade62f955006587
+>>>>>>>> 2fca4464be2ad948261052f42f3363ce917e3014:Assets/Resources/Model/CSI_Param3_1000/BlackAgent.onnx.meta
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
