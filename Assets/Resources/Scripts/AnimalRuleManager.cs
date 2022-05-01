@@ -386,7 +386,7 @@ namespace Assets.Resources.Scripts
 
                         Dictionary<(int Y, int X), (int Y, int X)> allowed_position = GetPieceMovePositionDict(slot.X, slot.Y, slot.GetPiece().pieceID);
 
-                        //있다면 스튜빗 무브를 리턴한다
+                        //적군기물의 이동범위에 현재 내 사자위치가 있다면 스튜핏 무브를 리턴한다
                         if (allowed_position.ContainsKey((targetSlotScript.Y, targetSlotScript.X)) == true)
                         {
                             return EGameState.StupidMove;
@@ -398,6 +398,7 @@ namespace Assets.Resources.Scripts
 
             }
 
+            //나의 기물로 상대방의 사자에게 장군을 불렀는가?
             if (CheckRangeOpponentLion(targetSlotScript) == true && result == EGameState.Continue)
             {
                 result = EGameState.ThreatLion;
