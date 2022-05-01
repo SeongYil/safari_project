@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Resources/Model/SON/WhiteAgent.onnx.meta
 guid: 45b321d9a3b018645be69e308617668e
+========
+guid: 4b54fa144c0fed94f86bd6420252fa1d
+>>>>>>>> 2fca4464be2ad948261052f42f3363ce917e3014:Assets/Resources/Model/CSI_Param3_900/WhiteAgent.onnx.meta
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}

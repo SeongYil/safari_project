@@ -225,6 +225,7 @@ namespace Assets.Resources.Scripts
             EActionType actionType = EActionType.Piece;
             EGameState result = EGameState.Continue;
 
+            //새로운 기물 놓는지 check
             if (start.Length < 2 )
             {
                 actionType = EActionType.Stock;
@@ -232,6 +233,20 @@ namespace Assets.Resources.Scripts
 
             //(int X, int Y) target_pos = GetPositionFromString(end);
             (int Y, int X) target_pos = GameManager.StringPosToIntPos[end];
+            
+            //      x:0,    x:1 ,    x2:
+            //y:0  [0,0]   [0,1]   [0,2]
+            //y:1  [1,0]   [1,1]   [1,2]
+            //y:2  [2,0]   [2,1]   [2,2]
+            //y:3  [3,0]   [3,1]   [3,2]
+
+
+            //  1 ,2 ,3
+            //a 1a 2a 3a
+            //b 1b 2b 3b
+            //c 1c 2c 3c
+            //d 1d 2d 3d
+            //[ y , x ]
 
             BoardSlot targetSlotScript = env.BoardSlots[target_pos.Y, target_pos.X];   
 
@@ -240,6 +255,7 @@ namespace Assets.Resources.Scripts
             {
                 case EActionType.Piece:
                     {
+                        // target피스가 뭔진 모르는데 일단 가져와
                         Piece targetPiece = targetSlotScript.GetPiece();
                         //기존 위치에 있던 기물의 piece의 부모를 변경 
                         //(int X, int Y) start_pos = GetPositionFromString(start);
@@ -249,7 +265,8 @@ namespace Assets.Resources.Scripts
                         Piece startPiece = startSlotScript.GetPiece();
                         startSlotScript.SetPiece(null);
 
-                        if (targetPiece != null )
+                        
+                        if (targetPiece != null ) //가져온 타겟피스에 기물이 있는 경우
                         {
                             //잡는 기물이 있는 경우
                             (int color, int pieceID) stockID = BoardStock.GetStockID(targetPiece.pieceID);
@@ -286,7 +303,7 @@ namespace Assets.Resources.Scripts
                                 result = EGameState.CaptureElephant;
                             }
 
-                            //잡힘 피스 삭제
+                            //잡은 피스 삭제
                             Destroy(targetPiece.gameObject);
                             
                         }
@@ -367,7 +384,7 @@ namespace Assets.Resources.Scripts
                     }
             }
 
-            //내기물이 사자인가? 
+            // 내기물이 사자인가? 
             if (targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2)
             {
                 //사자인데, 상대방 기물의 사정거리에 내 사자 있는 경우 
@@ -386,7 +403,7 @@ namespace Assets.Resources.Scripts
 
                         Dictionary<(int Y, int X), (int Y, int X)> allowed_position = GetPieceMovePositionDict(slot.X, slot.Y, slot.GetPiece().pieceID);
 
-                        //있다면 스튜빗 무브를 리턴한다
+                        //적군기물의 이동범위에 현재 내 사자위치가 있다면 스튜핏 무브를 리턴한다
                         if (allowed_position.ContainsKey((targetSlotScript.Y, targetSlotScript.X)) == true)
                         {
                             return EGameState.StupidMove;
@@ -398,7 +415,8 @@ namespace Assets.Resources.Scripts
 
             }
 
-            if (CheckRangeOpponentLion(targetSlotScript) == true && result == EGameState.Continue)
+            //나의 기물로 상대방의 사자에게 장군을 불렀는가?
+            if (CheckRangeOpponentLion(targetSlotScript) == true)
             {
                 result = EGameState.ThreatLion;
                 return result;
@@ -433,50 +451,68 @@ namespace Assets.Resources.Scripts
             {
                 case EGameState.Promotion:
                     {
+                        UnityEngine.Debug.Log("진화");
+
                         Agent[eCurrentTurn].AddReward(+0.025f);
                         break;
                     }
                 case EGameState.OnBoardGiraph:
                     {
+                        UnityEngine.Debug.Log("기린 놓기");
+
                         Agent[eCurrentTurn].AddReward(+0.03f);
                         break;
                     }
                 case EGameState.OnBoardElephant:
                     {
+
+                        UnityEngine.Debug.Log("코끼리 놓기");
+
                         Agent[eCurrentTurn].AddReward(+0.02f);
                         break;
                     }
                 case EGameState.OnBoardChick:
                     {
+                        UnityEngine.Debug.Log("병아리 놓기");
+
                         Agent[eCurrentTurn].AddReward(+0.01f);
                         break;
                     }
                 case EGameState.CaptureChick:
                     {
+                        UnityEngine.Debug.Log("병아리 잡기");
                         Agent[eCurrentTurn].AddReward(+0.01f);
                         Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.CaptureChicken:
                     {
+                        UnityEngine.Debug.Log("닭 잡기");
+
                         Agent[eCurrentTurn].AddReward(+0.035f);
                         Agent[eOpponent].AddReward(-0.035f);
                         break;
                     }
                 case EGameState.CaptureElephant:
                     {
+                        UnityEngine.Debug.Log("코끼리 잡기");
+
                         Agent[eCurrentTurn].AddReward(+0.02f);
                         Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
                 case EGameState.CaptureGiraph:
                     {
+                        UnityEngine.Debug.Log("기린 잡기");
+
                         Agent[eCurrentTurn].AddReward(+0.03f);
                         Agent[eOpponent].AddReward(-0.03f);
                         break;
                     }
                 case EGameState.Win:
                     {
+                        UnityEngine.Debug.Log("State : Win");
+
                         Agent[eCurrentTurn].SetReward(1.0f);
                         Agent[eOpponent].SetReward(-1.0f);
 
@@ -489,6 +525,8 @@ namespace Assets.Resources.Scripts
                     }
                 case EGameState.ThreatLion:
                     {
+                        UnityEngine.Debug.Log("사자 위협");
+
                         Agent[eCurrentTurn].AddReward(0.1f);
                         Agent[eOpponent].AddReward(-0.1f);
                         break;
@@ -496,11 +534,14 @@ namespace Assets.Resources.Scripts
                 case EGameState.Continue:
                     {
                         //일반
+                        UnityEngine.Debug.Log("일반 움직임");
                         Agent[eCurrentTurn].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.StupidMove:
                     {
+                        UnityEngine.Debug.Log("자충수");
+
                         Agent[eCurrentTurn].SetReward(-1.0f);
                         Agent[eOpponent].SetReward(0.0f);
                         
@@ -658,20 +699,33 @@ namespace Assets.Resources.Scripts
             }
 
             //stock or piece
-            UnityEngine.Debug.Log("start : " + start_pos_str);
+            //UnityEngine.Debug.Log("start : " + start_pos_str);
 
             //target slot
-            UnityEngine.Debug.Log("dest : " + target_pos_str);
+            //UnityEngine.Debug.Log("dest : " + target_pos_str);
 
-            UnityEngine.Debug.LogFormat("encode : {0}", action.ToString());
+            //UnityEngine.Debug.LogFormat("encode : {0}", action.ToString());
 
             //해당 액션 수행 
             //게임 종료
-            if(SetActionMove(start_pos_str, target_pos_str) == EGameState.Win)
+
+            //if(SetActionMove(start_pos_str, target_pos_str) == EGameState.Win)
+            
+                //ResetGame();
+                //return false;
+            
+            var results = SetActionMove(start_pos_str, target_pos_str);
+
+            if (results == EGameState.Win) 
             {
+                SetReward(results);
                 ResetGame();
                 return false;
             }
+
+            SetReward(results);
+
+
 
 
             //셀렉트 피스 초기화

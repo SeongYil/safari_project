@@ -19,6 +19,12 @@ namespace Assets.Resources.Scripts
         [System.NonSerialized]
         public Material DefaultSpriteMaterial;
 
+        public bool ReleaseMode = false;
+
+        public SharedDataType.EColor HumanColor = SharedDataType.EColor.White;
+
+        public Unity.Barracuda.NNModel BlackModel;
+        public Unity.Barracuda.NNModel WhiteModel;
 
         private Sprite[] NumberSprite = null;
         private Dictionary<string, Sprite> number_sprite_dictionary = null;

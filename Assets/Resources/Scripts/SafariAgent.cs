@@ -46,22 +46,36 @@ namespace Assets.Resources.Scripts
 
 			behaviorParameters.InferenceDevice = Unity.MLAgents.Policies.InferenceDevice.GPU;
 
-			
+			behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 
 
-			if(name.Contains("Black"))
+			if (name.Contains("Black"))
             {
+
+
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
-				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/SON3/BlackAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
+				if (GameManager.instance.ReleaseMode == true)
+				{
+					behaviorParameters.Model = GameManager.instance.BlackModel;
+					if (GameManager.instance.HumanColor == SharedDataType.EColor.Black)
+					{
+						behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+					}
+				}
 				//isRandomAgent = true;
 			}
             else
             {
 				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
-				behaviorParameters.Model = UnityEngine.Resources.Load<Unity.Barracuda.NNModel>("Model/SON3/WhiteAgent");
-				behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+				if (GameManager.instance.ReleaseMode == true)
+                {
+					behaviorParameters.Model = GameManager.instance.WhiteModel;
+				}
 
+				if (GameManager.instance.HumanColor == SharedDataType.EColor.White)
+				{
+					behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
+				}
 			}
 
 
