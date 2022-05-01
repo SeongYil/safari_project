@@ -216,7 +216,7 @@ namespace Assets.Resources.Scripts
             OnBoardElephant,
             Promotion,
             ThreatLion,
-            StupidMove,
+            StupidAction,
             Win,
         }
 
@@ -232,6 +232,23 @@ namespace Assets.Resources.Scripts
 
             //(int X, int Y) target_pos = GetPositionFromString(end);
             (int Y, int X) target_pos = GameManager.StringPosToIntPos[end];
+
+
+
+            //      x:0,    x:1 ,    x2:
+            //y:0  [0,0]   [0,1]   [0,2] 
+            //y:1  [1,0]   [1,1]   [1,2]
+            //y:2  [2,0]   [2,1]   [2,2]
+            //y:3  [3,0]   [3,1]   [3,2]
+
+            //  1 ,2 ,3
+            //a 1a 2a 3a
+            //b 1b 2b 3b
+            //c 1c 2c 3c
+            //d 1d 2d 3d 
+
+            //[ y , x ] 
+
 
             BoardSlot targetSlotScript = env.BoardSlots[target_pos.Y, target_pos.X];   
 
@@ -389,28 +406,65 @@ namespace Assets.Resources.Scripts
                         //적군기물의 이동범위에 현재 내 사자위치가 있다면 스튜핏 무브를 리턴한다
                         if (allowed_position.ContainsKey((targetSlotScript.Y, targetSlotScript.X)) == true)
                         {
-                            return EGameState.StupidMove;
+                            return EGameState.StupidAction;
                         }
 
                     }
                 }
-
-
             }
 
             //나의 기물로 상대방의 사자에게 장군을 불렀는가?
             if (CheckRangeOpponentLion(targetSlotScript) == true && result == EGameState.Continue)
             {
                 result = EGameState.ThreatLion;
-                return result;
             }
 
 
+            //내가 어떤 액션을 다했는데, 여전히 장군상태인 경우, 스튜핏액션을 한거다.
+            foreach( BoardSlot thisSlot in env.BoardSlots )
+            {
+                //비어있으면 
+                if (thisSlot.GetPiece() == null )
+                {
+                    continue;
+                }
+
+                //적군 기물이면  
+                if (thisSlot.GetPiece().eColor != eCurrentTurn)
+                {
+                    continue;
+                }
+
+                if (thisSlot.GetPiece().pieceID == Environment.L1 || thisSlot.GetPiece().pieceID == Environment.L2 )
+                {
+                    BoardSlot myLioninSlot = thisSlot;
+
+                    //적군 기물들한테, thisSlot에 올 수 있는 친구?
+                    foreach ( BoardSlot enemySlot in env.BoardSlots)
+                    {
+                        if( enemySlot.GetPiece() == null)
+                        {
+                            continue;
+                        }
+
+                        if (enemySlot.GetPiece().eColor == eCurrentTurn)
+                        {
+                            continue;
+                        }
+
+                        var allowedPositionDict = GetPieceMovePositionDict(enemySlot.X, enemySlot.Y, enemySlot.GetPiece().pieceID);
+
+                        if (allowedPositionDict.ContainsKey( (myLioninSlot.Y, myLioninSlot.X) ) == true)
+                        {
+                            return EGameState.StupidAction;
+                        }
+
+                    }
 
 
+                }
 
-
-
+            }
 
             return result;
 
@@ -500,7 +554,7 @@ namespace Assets.Resources.Scripts
                         Agent[eCurrentTurn].AddReward(-0.01f);
                         break;
                     }
-                case EGameState.StupidMove:
+                case EGameState.StupidAction:
                     {
                         Agent[eCurrentTurn].SetReward(-1.0f);
                         Agent[eOpponent].SetReward(0.0f);
