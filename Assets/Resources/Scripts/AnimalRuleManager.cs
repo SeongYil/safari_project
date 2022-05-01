@@ -401,34 +401,34 @@ namespace Assets.Resources.Scripts
                     }
             }
 
-            // 내기물이 사자인가? 
-            if (targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2)
-            {
-                //사자인데, 상대방 기물의 사정거리에 내 사자 있는 경우 
-                foreach (BoardSlot slot in env.BoardSlots)
-                {
-                    if (slot.GetPiece() == null)
-                    {
-                        continue;
-                    }
+            //// 내기물이 사자인가? 
+            //if (targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2)
+            //{
+            //    //사자인데, 상대방 기물의 사정거리에 내 사자 있는 경우 
+            //    foreach (BoardSlot slot in env.BoardSlots)
+            //    {
+            //        if (slot.GetPiece() == null)
+            //        {
+            //            continue;
+            //        }
 
-                    if (slot.GetPiece().eColor != eCurrentTurn)
-                    {
-                        //해당 슬롯의 기물은 적군이다.
-                        //적군의 사정거리에 현재 나의 포지션이 있는가? 
-                        //피스의 모든 경로를 리턴하는 함수 GetPieceMovePosition
+            //        if (slot.GetPiece().eColor != eCurrentTurn)
+            //        {
+            //            //해당 슬롯의 기물은 적군이다.
+            //            //적군의 사정거리에 현재 나의 포지션이 있는가? 
+            //            //피스의 모든 경로를 리턴하는 함수 GetPieceMovePosition
 
-                        Dictionary<(int Y, int X), (int Y, int X)> allowed_position = GetPieceMovePositionDict(slot.X, slot.Y, slot.GetPiece().pieceID);
+            //            Dictionary<(int Y, int X), (int Y, int X)> allowed_position = GetPieceMovePositionDict(slot.X, slot.Y, slot.GetPiece().pieceID);
 
-                        //적군기물의 이동범위에 현재 내 사자위치가 있다면 스튜핏 무브를 리턴한다
-                        if (allowed_position.ContainsKey((targetSlotScript.Y, targetSlotScript.X)) == true)
-                        {
-                            return EGameState.StupidAction;
-                        }
+            //            //적군기물의 이동범위에 현재 내 사자위치가 있다면 스튜핏 무브를 리턴한다
+            //            if (allowed_position.ContainsKey((targetSlotScript.Y, targetSlotScript.X)) == true)
+            //            {
+            //                return EGameState.StupidAction;
+            //            }
 
-                    }
-                }
-            }
+            //        }
+            //    }
+            //}
 
             //나의 기물로 상대방의 사자에게 장군을 불렀는가?
             if (CheckRangeOpponentLion(targetSlotScript) == true)
