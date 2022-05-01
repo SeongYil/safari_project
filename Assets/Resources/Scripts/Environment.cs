@@ -31,13 +31,14 @@ namespace Assets.Resources.Scripts
         private Transform parentTransform;
         public BoardSlot[,] BoardSlots = null;
         public BoardStock[,] BoardStocks = null;
-
+        //    
+        //y:0  흰코끼리    흰기린   흰 병아리
+        //y:1  검코끼리    검기린   검 병아리
         public const int X = 3;
         public const int Y = 4;
 
 
         
-
 
 
 

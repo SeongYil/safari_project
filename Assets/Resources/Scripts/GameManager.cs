@@ -104,7 +104,7 @@ namespace Assets.Resources.Scripts
         void Start()
         {
 
-            //This gets the Main Camera from the Scene
+            //리소스 로드
             m_MainCamera = Camera.main;
 
             NumberSprite = UnityEngine.Resources.LoadAll<Sprite>("images/number");
@@ -118,6 +118,19 @@ namespace Assets.Resources.Scripts
             }
 
             BoardManager.InitializeBoard();
+
+
+            //만약 Release 모드라면 선후공 페이지 생성  
+            if(ReleaseMode == true)
+            {
+                // 선 후공 메뉴 생성 
+
+                // 컨트롤하고 있는 게임룰 매니저의 Agent의 모드 변경
+
+            }
+
+            
+
 
             //Initialize
             for (int i = 0; i < EnvironmentCount; i++)
@@ -156,6 +169,8 @@ namespace Assets.Resources.Scripts
 
             }
 
+
+            //
 
 
 
