@@ -505,43 +505,41 @@ namespace Assets.Resources.Scripts
             {
                 case EGameState.Promotion:
                     {
-                        UnityEngine.Debug.Log("진화");
-
+                        //UnityEngine.Debug.Log("진화");
                         Agent[eCurrentTurn].AddReward(+0.025f);
                         break;
                     }
                 case EGameState.OnBoardGiraph:
                     {
-                        UnityEngine.Debug.Log("기린 놓기");
-
+                        //UnityEngine.Debug.Log("기린 놓기");
                         Agent[eCurrentTurn].AddReward(+0.03f);
                         break;
                     }
                 case EGameState.OnBoardElephant:
                     {
 
-                        UnityEngine.Debug.Log("코끼리 놓기");
+                        //UnityEngine.Debug.Log("코끼리 놓기");
 
                         Agent[eCurrentTurn].AddReward(+0.02f);
                         break;
                     }
                 case EGameState.OnBoardChick:
                     {
-                        UnityEngine.Debug.Log("병아리 놓기");
+                        //UnityEngine.Debug.Log("병아리 놓기");
 
                         Agent[eCurrentTurn].AddReward(+0.01f);
                         break;
                     }
                 case EGameState.CaptureChick:
                     {
-                        UnityEngine.Debug.Log("병아리 잡기");
+                        //UnityEngine.Debug.Log("병아리 잡기");
                         Agent[eCurrentTurn].AddReward(+0.01f);
                         Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.CaptureChicken:
                     {
-                        UnityEngine.Debug.Log("닭 잡기");
+                        //UnityEngine.Debug.Log("닭 잡기");
 
                         Agent[eCurrentTurn].AddReward(+0.035f);
                         Agent[eOpponent].AddReward(-0.035f);
@@ -549,7 +547,7 @@ namespace Assets.Resources.Scripts
                     }
                 case EGameState.CaptureElephant:
                     {
-                        UnityEngine.Debug.Log("코끼리 잡기");
+                        //UnityEngine.Debug.Log("코끼리 잡기");
 
                         Agent[eCurrentTurn].AddReward(+0.02f);
                         Agent[eOpponent].AddReward(-0.02f);
@@ -557,7 +555,7 @@ namespace Assets.Resources.Scripts
                     }
                 case EGameState.CaptureGiraph:
                     {
-                        UnityEngine.Debug.Log("기린 잡기");
+                        //UnityEngine.Debug.Log("기린 잡기");
 
                         Agent[eCurrentTurn].AddReward(+0.03f);
                         Agent[eOpponent].AddReward(-0.03f);
@@ -565,7 +563,7 @@ namespace Assets.Resources.Scripts
                     }
                 case EGameState.Win:
                     {
-                        UnityEngine.Debug.Log("State : Win");
+                        //UnityEngine.Debug.Log("State : Win");
 
                         Agent[eCurrentTurn].SetReward(1.0f);
                         Agent[eOpponent].SetReward(-1.0f);
@@ -579,7 +577,7 @@ namespace Assets.Resources.Scripts
                     }
                 case EGameState.ThreatLion:
                     {
-                        UnityEngine.Debug.Log("사자 위협");
+                        //UnityEngine.Debug.Log("사자 위협");
 
                         Agent[eCurrentTurn].AddReward(0.1f);
                         Agent[eOpponent].AddReward(-0.1f);
@@ -588,13 +586,13 @@ namespace Assets.Resources.Scripts
                 case EGameState.Continue:
                     {
                         //일반
-                        UnityEngine.Debug.Log("일반 움직임");
+                        //UnityEngine.Debug.Log("일반 움직임");
                         Agent[eCurrentTurn].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.StupidAction:
                     {
-                        UnityEngine.Debug.Log("자충수");
+                        //UnityEngine.Debug.Log("자충수");
 
                         Agent[eCurrentTurn].SetReward(-1.0f);
                         Agent[eOpponent].SetReward(0.0f);
