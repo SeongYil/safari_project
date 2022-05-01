@@ -20,11 +20,10 @@ namespace Assets.Resources.Scripts
 
 		private AnimalRuleManager ruleManager;
 
-		private Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
+		public Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
 		private int AllActionSize = 360;
 		private int AllObservationSize = 18;
-		
 
 		public void InitializeAgent(AnimalRuleManager animalRulemanager, string name , SharedDataType.EColor colorType)
         {
@@ -85,7 +84,13 @@ namespace Assets.Resources.Scripts
 
         public override void OnEpisodeBegin()
 		{
-			//ruleManager.ResetGame();
+
+			if (ruleManager.isEnvironmentInit == false)
+			{
+				ruleManager.ResetGame();
+			}
+
+
 		}
 
 		public override void CollectObservations(VectorSensor sensor)
@@ -107,29 +112,34 @@ namespace Assets.Resources.Scripts
         }
 
 		public override void OnActionReceived(ActionBuffers actionBuffers)
-		{
+        {
+            int action = actionBuffers.DiscreteActions[0];
+
+			//액션 디코딩 후 
+
+			if (ruleManager.GetAvailableAllActions().ContainsKey(action) == false)
+			{
+				return;
+			}
+
+
+			int[,] boardState = ruleManager.env.GetCurrentBoardState();
+
+			(string start, string dest) pos = Decoder.action_to_stringTuple(action, boardState);
+
+			AnimalRuleManager.EGameState actionResult = ruleManager.SetActionMove(pos.start, pos.dest);
+			ruleManager.isEnvironmentInit = false;
+
+			//게임이 끝났을 수도 있음
+			ruleManager.SetReward(actionResult);
+
+			if ((actionResult == AnimalRuleManager.EGameState.StupidAction) || (actionResult == AnimalRuleManager.EGameState.Win))
+			{
+				return;
+			}
+
+			ruleManager.ChangeTurn();
 			
-
-			int action = actionBuffers.DiscreteActions[0];
-
-			//if(isRandomAgent == false)
-            //{
-			ruleManager.SetActionMove(action);
-			//}
-   //         else
-   //         {
-			//	Dictionary<double, double> allAvailableAction = ruleManager.GetAvailableAllActions();
-
-			//	List<KeyValuePair<double,double>> listAvailable = allAvailableAction.ToList();
-
-			//	int randomAction = UnityEngine.Random.Range(0, listAvailable.Count);
-
-			//	ruleManager.SetActionMove(listAvailable[randomAction].Key);
-
-			//}
-
-			
-
 
 		}
 

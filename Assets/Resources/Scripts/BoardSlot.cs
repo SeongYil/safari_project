@@ -156,20 +156,8 @@ namespace Assets.Resources.Scripts
                 //Debug.Log("dest : " + ruleManager.GetStringPosition(X, Y));
                 //매니저야 여기서 마우스 업했엉
                 //
-                bool move = ruleManager.MoveTry(X, Y);
-
-                
-
-
-                if(move == true)
-                {
-                    //성공
-                }
-                else
-                {
-                    //실패
-                }
-
+                ruleManager.MoveTry(X, Y);
+                ruleManager.isEnvironmentInit = false;
                 
             }
 

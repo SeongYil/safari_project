@@ -9,9 +9,6 @@ namespace Assets.Resources.Scripts
     public class Decoder
     {
         static Dictionary<string, int> stock_kinds = new Dictionary<string, int>() { { "E", 0 }, { "G", 1 }, { "P", 2 } };
-
-        static string num1 = "123";
-        static string string1 = "abcd";
         static int board_size = 12;
 
         static Dictionary<string, double> PositionStrToIndex = new Dictionary<string, double>()

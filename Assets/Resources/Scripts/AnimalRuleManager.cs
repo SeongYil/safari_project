@@ -11,7 +11,35 @@ using System.Text;
 //mcts --> 룰 매니저 현재턴에서 가능한 액션 알려줘
 
 
+//      x:0,    x:1 ,    x2:
+//y:0  [0,0]   [0,1]   [0,2]
+//y:1  [1,0]   [1,1]   [1,2]
+//y:2  [2,0]   [2,1]   [2,2]
+//y:3  [3,0]   [3,1]   [3,2]
 
+
+//  1 ,2 ,3
+//a 1a 2a 3a
+//b 1b 2b 3b
+//c 1c 2c 3c
+//d 1d 2d 3d
+//[ y , x ]
+
+
+
+//      x:0,    x:1 ,    x2:
+//y:0  [0,0]   [0,1]   [0,2] 
+//y:1  [1,0]   [1,1]   [1,2]
+//y:2  [2,0]   [2,1]   [2,2]
+//y:3  [3,0]   [3,1]   [3,2]
+
+//  1 ,2 ,3
+//a 1a 2a 3a
+//b 1b 2b 3b
+//c 1c 2c 3c
+//d 1d 2d 3d 
+
+//[ y , x ] 
 
 namespace Assets.Resources.Scripts
 {
@@ -37,6 +65,9 @@ namespace Assets.Resources.Scripts
         Dictionary<int, (int dirY, int dirX)[]> ALLOWED_MOVES = null;
 
 
+        public bool isEnvironmentInit = true;
+
+        public int episodeLength = 0;
 
         private Piece SelectedPiece = null;
 
@@ -109,8 +140,16 @@ namespace Assets.Resources.Scripts
         // Update is called once per frame
         void Update()
         {
+            if(Agent[eCurrentTurn].behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.Default)
+            {
+                Agent[eCurrentTurn].RequestDecision();
+                //ChangeTurn();
+            }
+            
 
-            Agent[eCurrentTurn].RequestDecision();
+            
+
+            isEnvironmentInit = false;
 
             //해당 피스를 새로 만들어주고 크기는 원래대로 
             //마우스 포지션에 붙게함
@@ -135,6 +174,10 @@ namespace Assets.Resources.Scripts
 
         public void ResetGame()
         {
+            episodeLength = 0;
+
+            isEnvironmentInit = true;
+
             eCurrentTurn = SharedDataType.EColor.White;
             GameObject envObj = env.GetEnvironmentObj();
             Destroy(envObj);
@@ -167,36 +210,6 @@ namespace Assets.Resources.Scripts
             return true;
         }
 
-        //action 들어오면 그 행동을 한다
-        public void SetActionMove(double action)
-        {
-            //액션 디코딩 후 
-
-            if( GetAvailableAllActions().ContainsKey(action) == false )
-            {
-                return;
-            }
-
-
-            int[,] boardState = env.GetCurrentBoardState();
-
-            (string start, string dest) pos = Decoder.action_to_stringTuple(action, boardState);
-
-            EGameState actionResult = SetActionMove(pos.start, pos.dest);
-
-
-            SetReward(actionResult);
-
-            if (actionResult == EGameState.Win)
-            {
-                return;
-            }
-
-            ChangeTurn();
-
-        }
-
-        //
         public enum EActionType
         {
             Stock,
@@ -234,35 +247,7 @@ namespace Assets.Resources.Scripts
             //(int X, int Y) target_pos = GetPositionFromString(end);
             (int Y, int X) target_pos = GameManager.StringPosToIntPos[end];
             
-            //      x:0,    x:1 ,    x2:
-            //y:0  [0,0]   [0,1]   [0,2]
-            //y:1  [1,0]   [1,1]   [1,2]
-            //y:2  [2,0]   [2,1]   [2,2]
-            //y:3  [3,0]   [3,1]   [3,2]
 
-
-            //  1 ,2 ,3
-            //a 1a 2a 3a
-            //b 1b 2b 3b
-            //c 1c 2c 3c
-            //d 1d 2d 3d
-            //[ y , x ]
-
-
-
-            //      x:0,    x:1 ,    x2:
-            //y:0  [0,0]   [0,1]   [0,2] 
-            //y:1  [1,0]   [1,1]   [1,2]
-            //y:2  [2,0]   [2,1]   [2,2]
-            //y:3  [3,0]   [3,1]   [3,2]
-
-            //  1 ,2 ,3
-            //a 1a 2a 3a
-            //b 1b 2b 3b
-            //c 1c 2c 3c
-            //d 1d 2d 3d 
-
-            //[ y , x ] 
 
 
             BoardSlot targetSlotScript = env.BoardSlots[target_pos.Y, target_pos.X];   
@@ -540,7 +525,6 @@ namespace Assets.Resources.Scripts
                 case EGameState.CaptureChicken:
                     {
                         //UnityEngine.Debug.Log("닭 잡기");
-
                         Agent[eCurrentTurn].AddReward(+0.035f);
                         Agent[eOpponent].AddReward(-0.035f);
                         break;
@@ -568,10 +552,12 @@ namespace Assets.Resources.Scripts
                         Agent[eCurrentTurn].SetReward(1.0f);
                         Agent[eOpponent].SetReward(-1.0f);
 
+                        
+
                         Agent[eCurrentTurn].EndEpisode();
                         Agent[eOpponent].EndEpisode();
 
-                        ResetGame();
+                        
 
                         break;
                     }
@@ -579,15 +565,15 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("사자 위협");
 
-                        Agent[eCurrentTurn].AddReward(0.1f);
-                        Agent[eOpponent].AddReward(-0.1f);
+                        //Agent[eCurrentTurn].AddReward(0.1f);
+                        //Agent[eOpponent].AddReward(-0.1f);
                         break;
                     }
                 case EGameState.Continue:
                     {
                         //일반
                         //UnityEngine.Debug.Log("일반 움직임");
-                        Agent[eCurrentTurn].AddReward(-0.01f);
+                        Agent[eCurrentTurn].AddReward(-0.001f);
                         break;
                     }
                 case EGameState.StupidAction:
@@ -720,11 +706,12 @@ namespace Assets.Resources.Scripts
         }
 
 
-        public bool MoveTry(int target_x, int target_y)
+        //사람용
+        public void MoveTry(int target_x, int target_y)
         {
             if( start_pos_str == "")
             {
-                return false;
+                return;
             }
 
 
@@ -746,8 +733,7 @@ namespace Assets.Resources.Scripts
 
                 //셀렉트 피스 초기화
                 UnSelectedPiece();
-
-                return false;
+                return ;
             }
 
             //stock or piece
@@ -767,26 +753,30 @@ namespace Assets.Resources.Scripts
                 //return false;
             
             var results = SetActionMove(start_pos_str, target_pos_str);
+            isEnvironmentInit = false;
 
-            if (results == EGameState.Win) 
+            if (results == EGameState.Win ) 
             {
+                
                 SetReward(results);
-                ResetGame();
-                return false;
+                return;
             }
 
+            //테스트용 함수
             SetReward(results);
-
-
-
 
             //셀렉트 피스 초기화
             UnSelectedPiece();
 
             //턴 변경
+            if( isEnvironmentInit == true)
+            {
+                return;
+            }
+
             ChangeTurn();
 
-            return true;
+            return ;
 
         }
 
@@ -925,13 +915,6 @@ namespace Assets.Resources.Scripts
             }
             return actions;
         }
-
-        public bool MoveTryStock()
-        {
-
-            return false;
-        }
-
 
         //모든 부분은 어둡게
         public void VisualizeAllNonPermission()
