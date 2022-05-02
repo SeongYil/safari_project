@@ -125,6 +125,17 @@ namespace Assets.Resources.Scripts
 			//게임이 끝났을 수도 있음
 			ruleManager.SetReward(actionResult);
 
+			if( actionResult == AnimalRuleManager.EGameState.ERROR_ACTION )
+            {
+				UnityEngine.Debug.Log("Action Error");
+				ruleManager.Agent[SharedDataType.EColor.Black].EpisodeInterrupted();
+				ruleManager.Agent[SharedDataType.EColor.White].EpisodeInterrupted();
+				ruleManager.ResetGame();
+
+
+
+				return;
+			}
 
 			if ((actionResult == AnimalRuleManager.EGameState.Win || actionResult == AnimalRuleManager.EGameState.StupidAction))
 			{
