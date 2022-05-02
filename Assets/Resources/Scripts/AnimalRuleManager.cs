@@ -92,11 +92,11 @@ namespace Assets.Resources.Scripts
         {
             GameObject agentObj = new GameObject(objectName);
             agentObj.transform.parent = transform;
+            agentObj.transform.localPosition = Vector3.zero;
+            agentObj.SetActive(false);
 
             SafariAgent agent = agentObj.AddComponent<SafariAgent>();
             agent.InitializeAgent(this, objectName, colorType);
-
-
 
             return agent;
         }
@@ -125,9 +125,51 @@ namespace Assets.Resources.Scripts
 
 
         }
+        private void OnEnable()
+        {
+
+
+            if (GameManager.instance.HumanColor == SharedDataType.EColor.White)
+            {
+                Agent[SharedDataType.EColor.Black].gameObject.SetActive(true);
+            }
+            else if(GameManager.instance.HumanColor == SharedDataType.EColor.Black)
+            {
+                Agent[SharedDataType.EColor.White].gameObject.SetActive(true);
+            }
+            else if(GameManager.instance.HumanColor == SharedDataType.EColor.Count)
+            {
+                if (Unity.MLAgents.Academy.Instance.IsCommunicatorOn == false)
+                {
+                    return;
+                }
+                Agent[SharedDataType.EColor.White].gameObject.SetActive(true);
+                Agent[SharedDataType.EColor.Black].gameObject.SetActive(true);
+            }
+
+
+        }
+
+        private void OnDisable()
+        {
+
+            Agent[SharedDataType.EColor.White].gameObject.SetActive(false);
+            Agent[SharedDataType.EColor.Black].gameObject.SetActive(false);
+        }
 
         private void Awake()
         {
+            GameObject environment = new GameObject("Environment");
+            environment.transform.parent = transform;
+            environment.transform.localPosition = new Vector3(0, 0, 0);
+            Environment env = new Environment();
+            Initialize(env);
+
+            //Agent 积己
+            InitializeAgent();
+
+            env.Initialize(this, environment.transform);
+
 
         }
 
@@ -144,8 +186,13 @@ namespace Assets.Resources.Scripts
             //if(Agent[eCurrentTurn].behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.Default)
             //{
             //UnityEngine.Debug.Log(Agent[eCurrentTurn].GetCumulativeReward());
-
-            Agent[eCurrentTurn].RequestDecision();
+            if(Agent[eCurrentTurn].enabled == true)
+            {
+                Agent[eCurrentTurn].RequestDecision();
+                
+            }
+                
+            
             //ChangeTurn();
             //}
 
@@ -269,8 +316,6 @@ namespace Assets.Resources.Scripts
                         if (startSlotScript.GetPiece().eColor != eCurrentTurn)
                         {
                             return EGameState.ERROR_ACTION;
-                            //UnityEngine.Debug.Break();
-
                         }
 
 
@@ -586,6 +631,7 @@ namespace Assets.Resources.Scripts
                     {
                         //老馆
                         //UnityEngine.Debug.Log("老馆 框流烙");
+                        //Agent[eCurrentTurn].AddReward(-1.001f);
                         Agent[eCurrentTurn].AddReward(-0.001f);
                         //Agent[eOpponent].AddReward(0f);
                         break;
@@ -593,11 +639,11 @@ namespace Assets.Resources.Scripts
                 case EGameState.StupidAction:
                     {
                         //UnityEngine.Debug.Log("磊面荐");
-                        Agent[eCurrentTurn].SetReward(-1.0f);
-                        Agent[eOpponent].AddReward(0.2f);
+                        Agent[eCurrentTurn].AddReward(-0.1f);
+                        //Agent[eOpponent].AddReward(+0.01f);
 
-                        Agent[eCurrentTurn].EndEpisode();
-                        Agent[eOpponent].EndEpisode();
+                        //Agent[eCurrentTurn].EndEpisode();
+                        //Agent[eOpponent].EndEpisode();
 
                         break;
                     }

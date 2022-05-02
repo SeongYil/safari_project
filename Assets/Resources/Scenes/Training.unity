@@ -239,6 +239,7 @@ MonoBehaviour:
   HumanColor: 2
   BlackModel: {fileID: 0}
   WhiteModel: {fileID: 0}
+  isTraining: 0
   EnvironmentCount: 16
 --- !u!4 &1044961574
 Transform:

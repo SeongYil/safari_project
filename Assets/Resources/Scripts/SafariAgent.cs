@@ -11,8 +11,8 @@ using Assets;
 
 namespace Assets.Resources.Scripts
 {
-    public class SafariAgent : Agent
-    {
+	public class SafariAgent : Agent
+	{
 
 		private SharedDataType.EColor eColor = SharedDataType.EColor.Count;
 
@@ -25,60 +25,40 @@ namespace Assets.Resources.Scripts
 		private int AllActionSize = 360;
 		private int AllObservationSize = 18;
 
-		public void InitializeAgent(AnimalRuleManager animalRulemanager, string name , SharedDataType.EColor colorType)
-        {
+		public void InitializeAgent(AnimalRuleManager animalRulemanager, string name, SharedDataType.EColor colorType)
+		{
 			ruleManager = animalRulemanager;
 			eColor = colorType;
-			behaviorParameters.TeamId = (int)colorType;
-		}
 
-		public void Awake()
-        {
 			behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
 			behaviorParameters.BehaviorName = name;
 			behaviorParameters.BrainParameters.VectorObservationSize = AllObservationSize;
 			behaviorParameters.BrainParameters.NumStackedVectorObservations = 1;
+			behaviorParameters.TeamId = (int)colorType;
 
 			int[] brancheSize = new int[1] { AllActionSize };
 			ActionSpec acionSpec = new ActionSpec(0, brancheSize);
 			behaviorParameters.BrainParameters.ActionSpec = acionSpec;
-
-			behaviorParameters.InferenceDevice = Unity.MLAgents.Policies.InferenceDevice.GPU;
-
+			behaviorParameters.InferenceDevice = Unity.MLAgents.Policies.InferenceDevice.Default;
 			behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
 
-
-			if (name.Contains("Black"))
-            {
-
-
-				behaviorParameters.TeamId = (int)SharedDataType.EColor.Black;
-				if (GameManager.instance.ReleaseMode == true)
-				{
-					behaviorParameters.Model = GameManager.instance.BlackModel;
-					if (GameManager.instance.HumanColor == SharedDataType.EColor.Black)
-					{
-						behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
-					}
-				}
-				//isRandomAgent = true;
+			if (colorType == SharedDataType.EColor.Black)
+			{
+				behaviorParameters.Model = GameManager.instance.BlackModel;
 			}
-            else
-            {
-				behaviorParameters.TeamId = (int)SharedDataType.EColor.White;
-				if (GameManager.instance.ReleaseMode == true)
-                {
-					behaviorParameters.Model = GameManager.instance.WhiteModel;
-				}
-
-				if (GameManager.instance.HumanColor == SharedDataType.EColor.White)
-				{
-					behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.HeuristicOnly;
-				}
+			else
+			{
+				behaviorParameters.Model = GameManager.instance.WhiteModel;
 			}
 
+		}
 
-			
+		public void Awake()
+		{
+
+
+
+
 
 		}
 
@@ -88,29 +68,34 @@ namespace Assets.Resources.Scripts
 
 
 
-        }
+		}
 
 		public override void CollectObservations(VectorSensor sensor)
 		{
 			int[,] boardState = ruleManager.env.GetCurrentBoardState();
 			int[,] stockState = ruleManager.env.GetCurrentStockState();
 
-			foreach( int pieceID in boardState )
-            {
+			foreach (int pieceID in boardState)
+			{
 				sensor.AddObservation(pieceID);
-            }
+			}
 
-            foreach (int stockCount in stockState)
-            {
-                sensor.AddObservation(stockCount);
-            }
+			foreach (int stockCount in stockState)
+			{
+				sensor.AddObservation(stockCount);
+			}
 
 
-        }
+		}
 
 		public override void OnActionReceived(ActionBuffers actionBuffers)
-        {
-            int action = actionBuffers.DiscreteActions[0];
+		{
+			int action = actionBuffers.DiscreteActions[0];
+
+			//if( ruleManager.GetAvailableAllActions().ContainsKey(action) == false )
+   //         {
+			//	return;
+   //         }
 
 			(string start, string dest) pos = Decoder.action_to_stringTuple(action);
 
@@ -125,26 +110,26 @@ namespace Assets.Resources.Scripts
 			//게임이 끝났을 수도 있음
 			ruleManager.SetReward(actionResult);
 
-			if( actionResult == AnimalRuleManager.EGameState.ERROR_ACTION )
-            {
-				UnityEngine.Debug.Log("Action Error");
-				ruleManager.Agent[SharedDataType.EColor.Black].EpisodeInterrupted();
-				ruleManager.Agent[SharedDataType.EColor.White].EpisodeInterrupted();
-				ruleManager.ResetGame();
+			//if (actionResult == AnimalRuleManager.EGameState.ERROR_ACTION)
+			//{
+			//	//UnityEngine.Debug.Log("Action Error");
+			//	ruleManager.Agent[SharedDataType.EColor.Black].EpisodeInterrupted();
+			//	ruleManager.Agent[SharedDataType.EColor.White].EpisodeInterrupted();
+			//	ruleManager.ResetGame();
 
 
 
-				return;
-			}
+			//	return;
+			//}
 
-			if ((actionResult == AnimalRuleManager.EGameState.Win || actionResult == AnimalRuleManager.EGameState.StupidAction))
+			if (actionResult == AnimalRuleManager.EGameState.Win)
 			{
 				ruleManager.ResetGame();
 				return;
 			}
 
 			ruleManager.ChangeTurn();
-			
+
 
 		}
 
@@ -159,8 +144,8 @@ namespace Assets.Resources.Scripts
 
 			Dictionary<double, double> allAction = ruleManager.GetAvailableAllActions();
 
-			foreach( KeyValuePair<double, double> availableAction in allAction )
-            {
+			foreach (KeyValuePair<double, double> availableAction in allAction)
+			{
 				int index = (int)availableAction.Value;
 				actionMask.SetActionEnabled(0, index, true);
 			}
@@ -170,12 +155,9 @@ namespace Assets.Resources.Scripts
 
 		}
 
-		public override void Heuristic(in ActionBuffers actionsOut)
-		{
+		//public override void Heuristic(in ActionBuffers actionsOut)
+		//{
 
-
-
-		}
-
+		//}
 	}
 }

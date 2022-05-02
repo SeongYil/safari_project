@@ -29,6 +29,8 @@ namespace Assets.Resources.Scripts
         private Sprite[] NumberSprite = null;
         private Dictionary<string, Sprite> number_sprite_dictionary = null;
 
+
+        public bool isTraining = false;
         public int EnvironmentCount = 1;
 
         static public Dictionary<(int y, int x), string> intPosToStringPos = new Dictionary<(int y, int x), string>();
@@ -38,6 +40,7 @@ namespace Assets.Resources.Scripts
         private void Awake()
         {
             instance = this;
+            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
 
             PieceManager.CreatePieceManager();
 
@@ -76,6 +79,35 @@ namespace Assets.Resources.Scripts
             StringPosToIntPos.Add("1d", (3, 0));
             StringPosToIntPos.Add("2d", (3, 1));
             StringPosToIntPos.Add("3d", (3, 2));
+
+            //리소스 로드
+            m_MainCamera = Camera.main;
+
+            NumberSprite = UnityEngine.Resources.LoadAll<Sprite>("images/number");
+            number_sprite_dictionary = new Dictionary<string, Sprite>();
+
+            for (int i = 0; i < NumberSprite.Length; i++)
+            {
+
+                number_sprite_dictionary[NumberSprite[i].name] = NumberSprite[i];
+
+            }
+
+            BoardManager.InitializeBoard();
+
+            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
+
+            //만약 Release 모드라면 선후공 페이지 생성  
+            if (ReleaseMode == true)
+            {
+                // 선 후공 메뉴 생성 
+
+                // 컨트롤하고 있는 게임룰 매니저의 Agent의 모드 변경
+
+            }
+
+
+
         }
 
         public Sprite GetSpriteNumber(int number)
@@ -103,35 +135,6 @@ namespace Assets.Resources.Scripts
         // Start is called before the first frame update
         void Start()
         {
-
-            //리소스 로드
-            m_MainCamera = Camera.main;
-
-            NumberSprite = UnityEngine.Resources.LoadAll<Sprite>("images/number");
-            number_sprite_dictionary = new Dictionary<string, Sprite>();
-
-            for (int i = 0; i < NumberSprite.Length; i++)
-            {
-
-                number_sprite_dictionary[NumberSprite[i].name] = NumberSprite[i];
-
-            }
-
-            BoardManager.InitializeBoard();
-
-
-            //만약 Release 모드라면 선후공 페이지 생성  
-            if(ReleaseMode == true)
-            {
-                // 선 후공 메뉴 생성 
-
-                // 컨트롤하고 있는 게임룰 매니저의 Agent의 모드 변경
-
-            }
-
-            
-
-
             //Initialize
             for (int i = 0; i < EnvironmentCount; i++)
             {
@@ -149,38 +152,47 @@ namespace Assets.Resources.Scripts
                 AnimalRuleManager ruleManager = animalGame.AddComponent<AnimalRuleManager>();
 
 
-                GameObject environment = new GameObject("Environment");
-                environment.transform.parent = animalGame.transform;
-                environment.transform.localPosition = new Vector3(0, 0, 0);
-
-                Environment env = new Environment();
-                ruleManager.Initialize(env);
-
-                //Agent 생성
-                ruleManager.InitializeAgent();
-
-                env.Initialize(ruleManager, environment.transform);
-
-                if( i == 0)
+                if (i == 0)
                 {
                     ControllerEnvrionment = ruleManager;
                 }
-
                 ruleManager.gameID = i;
+
 
             }
 
-
-            //
-
+        }
 
 
+        private void OnEnable()
+        {
+            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
+            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
+            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
+
+            //isTraining = true;
+
+        }
+
+        private void OnDisable()
+        {
+            //isTraining = false;
+            
         }
 
         //학습용 주석
         // Update is called once per frame
         void Update()
         {
+            if (isTraining)
+            {
+                //Unity.MLAgents.Academy.Instance.EnvironmentStep();
+            }
+
+            //if (Unity.MLAgents.Academy.Instance.IsCommunicatorOn == false)
+            //{
+                //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
+            ///}
 
             if (Input.GetMouseButtonDown(1))
             {
