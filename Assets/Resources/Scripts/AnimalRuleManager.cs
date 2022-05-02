@@ -635,7 +635,7 @@ namespace Assets.Resources.Scripts
                         //UnityEngine.Debug.Log("»çÀÚ À§Çù");
 
                         Agent[eCurrentTurn].AddReward(+0.01f);
-                        Agent[eOpponent].AddReward(-0.01f);
+                        //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.Continue:
