@@ -20,7 +20,7 @@ TagManager:
   - 
   - NonPermission
   - 
-  - 
+  - Menu
   - 
   - 
   - 
@@ -55,4 +55,7 @@ TagManager:
     locked: 0
   - name: NonPermission
     uniqueID: 926407669
+    locked: 0
+  - name: UI
+    uniqueID: 3723144963
     locked: 0

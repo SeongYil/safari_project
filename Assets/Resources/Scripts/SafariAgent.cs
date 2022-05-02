@@ -41,6 +41,7 @@ namespace Assets.Resources.Scripts
 			behaviorParameters.BrainParameters.ActionSpec = acionSpec;
 			behaviorParameters.InferenceDevice = Unity.MLAgents.Policies.InferenceDevice.Default;
 			behaviorParameters.BehaviorType = Unity.MLAgents.Policies.BehaviorType.Default;
+			behaviorParameters.DeterministicInference = true;
 
 			if (colorType == SharedDataType.EColor.Black)
 			{
@@ -124,7 +125,9 @@ namespace Assets.Resources.Scripts
 
 			if (actionResult == AnimalRuleManager.EGameState.Win)
 			{
+				Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
 				ruleManager.ResetGame();
+				Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
 				return;
 			}
 

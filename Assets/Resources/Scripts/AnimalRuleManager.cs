@@ -98,6 +98,7 @@ namespace Assets.Resources.Scripts
             SafariAgent agent = agentObj.AddComponent<SafariAgent>();
             agent.InitializeAgent(this, objectName, colorType);
 
+            agentObj.SetActive(true);
             return agent;
         }
 
@@ -125,36 +126,40 @@ namespace Assets.Resources.Scripts
 
 
         }
-        private void OnEnable()
+
+        public void SetPlayer()
         {
-
-
             if (GameManager.instance.HumanColor == SharedDataType.EColor.White)
             {
-                Agent[SharedDataType.EColor.Black].gameObject.SetActive(true);
+                Agent[SharedDataType.EColor.Black].enabled = true;
             }
-            else if(GameManager.instance.HumanColor == SharedDataType.EColor.Black)
+            else if (GameManager.instance.HumanColor == SharedDataType.EColor.Black)
             {
-                Agent[SharedDataType.EColor.White].gameObject.SetActive(true);
+                Agent[SharedDataType.EColor.White].enabled = true;
+
             }
-            else if(GameManager.instance.HumanColor == SharedDataType.EColor.Count)
+            else if (GameManager.instance.HumanColor == SharedDataType.EColor.Count)
             {
                 if (Unity.MLAgents.Academy.Instance.IsCommunicatorOn == false)
                 {
                     return;
                 }
-                Agent[SharedDataType.EColor.White].gameObject.SetActive(true);
-                Agent[SharedDataType.EColor.Black].gameObject.SetActive(true);
+                Agent[SharedDataType.EColor.White].enabled = true;
+                Agent[SharedDataType.EColor.Black].enabled = true;
             }
+        }
 
+        private void OnEnable()
+        {
+
+            SetPlayer();
 
         }
 
         private void OnDisable()
         {
-
-            Agent[SharedDataType.EColor.White].gameObject.SetActive(false);
-            Agent[SharedDataType.EColor.Black].gameObject.SetActive(false);
+            Agent[SharedDataType.EColor.White].enabled = true;
+            Agent[SharedDataType.EColor.Black].enabled = true;
         }
 
         private void Awake()
@@ -227,9 +232,13 @@ namespace Assets.Resources.Scripts
         {
             //isEnvironmentInit = true;
 
+            Agent[SharedDataType.EColor.Black].enabled = false;
+            Agent[SharedDataType.EColor.White].enabled = false;
+
             eCurrentTurn = SharedDataType.EColor.White;
             GameObject envObj = env.GetEnvironmentObj();
             Destroy(envObj);
+
             GameObject environment = new GameObject("Environment");
             environment.transform.parent = transform;
             environment.transform.localPosition = new Vector3(0, 0, 0);
@@ -239,7 +248,7 @@ namespace Assets.Resources.Scripts
 
             env.Initialize(this, environment.transform);
 
-
+            SetPlayer();
 
 
         }
@@ -553,12 +562,14 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("진화");
                         Agent[eCurrentTurn].AddReward(+0.01f);
+                        //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.OnBoardGiraph:
                     {
                         //UnityEngine.Debug.Log("기린 놓기");
-                        Agent[eCurrentTurn].AddReward(+0.025f);
+                        Agent[eCurrentTurn].AddReward(+0.02f);
+                        //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.OnBoardElephant:
@@ -566,14 +577,14 @@ namespace Assets.Resources.Scripts
 
                         //UnityEngine.Debug.Log("코끼리 놓기");
 
-                        Agent[eCurrentTurn].AddReward(+0.02f);
+                        Agent[eCurrentTurn].AddReward(+0.015f);
+                        //Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
                 case EGameState.OnBoardChick:
                     {
                         //UnityEngine.Debug.Log("병아리 놓기");
-
-                        Agent[eCurrentTurn].AddReward(+0.015f);
+                        Agent[eCurrentTurn].AddReward(+0.01f);
                         break;
                     }
                 case EGameState.CaptureChick:
@@ -594,7 +605,7 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("코끼리 잡기");
 
-                        Agent[eCurrentTurn].AddReward(+0.002f);
+                        Agent[eCurrentTurn].AddReward(+0.02f);
                         Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
@@ -624,7 +635,7 @@ namespace Assets.Resources.Scripts
                         //UnityEngine.Debug.Log("사자 위협");
 
                         Agent[eCurrentTurn].AddReward(+0.01f);
-                        //Agent[eOpponent].AddReward(-0.1f);
+                        Agent[eOpponent].AddReward(-0.1f);
                         break;
                     }
                 case EGameState.Continue:
@@ -640,7 +651,7 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("자충수");
                         Agent[eCurrentTurn].AddReward(-0.1f);
-                        //Agent[eOpponent].AddReward(+0.01f);
+                        Agent[eOpponent].AddReward(+0.1f);
 
                         //Agent[eCurrentTurn].EndEpisode();
                         //Agent[eOpponent].EndEpisode();
@@ -818,7 +829,9 @@ namespace Assets.Resources.Scripts
             {
 
                 //SetReward(results);
+                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
                 ResetGame();
+                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
                 return;
             }
 

@@ -21,6 +21,9 @@ namespace Assets.Resources.Scripts
 
         public bool ReleaseMode = false;
 
+        public GameObject MenuBoardObj = null;
+        public GameObject MenuButton = null;
+
         public SharedDataType.EColor HumanColor = SharedDataType.EColor.White;
 
         public Unity.Barracuda.NNModel BlackModel;
