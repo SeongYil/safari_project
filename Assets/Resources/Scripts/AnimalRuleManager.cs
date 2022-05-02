@@ -65,9 +65,9 @@ namespace Assets.Resources.Scripts
         Dictionary<int, (int dirY, int dirX)[]> ALLOWED_MOVES = null;
 
 
-        public bool isEnvironmentInit = true;
+        //public bool isEnvironmentInit = true;
 
-        public int episodeLength = 0;
+        public int gameID = 0;
 
         private Piece SelectedPiece = null;
 
@@ -96,7 +96,7 @@ namespace Assets.Resources.Scripts
             SafariAgent agent = agentObj.AddComponent<SafariAgent>();
             agent.InitializeAgent(this, objectName, colorType);
 
-            
+
 
             return agent;
         }
@@ -140,19 +140,23 @@ namespace Assets.Resources.Scripts
         // Update is called once per frame
         void Update()
         {
-            if(Agent[eCurrentTurn].behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.Default)
-            {
-                Agent[eCurrentTurn].RequestDecision();
-                //ChangeTurn();
-            }
-            
+            //학습용
+            //if(Agent[eCurrentTurn].behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.Default)
+            //{
+            //UnityEngine.Debug.Log(Agent[eCurrentTurn].GetCumulativeReward());
 
-            
+            Agent[eCurrentTurn].RequestDecision();
+            //ChangeTurn();
+            //}
 
-            isEnvironmentInit = false;
+
+
+
+            //isEnvironmentInit = false;
 
             //해당 피스를 새로 만들어주고 크기는 원래대로 
             //마우스 포지션에 붙게함
+            //학습용 주석
             if (SelectedPiece != null)
             {
                 if (CheckTurn(SelectedPiece.eColor) == false)
@@ -165,8 +169,8 @@ namespace Assets.Resources.Scripts
             }
 
 
- 
-            
+
+
 
 
 
@@ -174,9 +178,7 @@ namespace Assets.Resources.Scripts
 
         public void ResetGame()
         {
-            episodeLength = 0;
-
-            isEnvironmentInit = true;
+            //isEnvironmentInit = true;
 
             eCurrentTurn = SharedDataType.EColor.White;
             GameObject envObj = env.GetEnvironmentObj();
@@ -190,7 +192,7 @@ namespace Assets.Resources.Scripts
 
             env.Initialize(this, environment.transform);
 
-            
+
 
 
         }
@@ -200,9 +202,9 @@ namespace Assets.Resources.Scripts
         //해당 액션이 적법한지 확인하는 메소드
         public bool CheckAction(double action)
         {
-            Dictionary<double,double> allAction = GetAvailableAllActions();
+            Dictionary<double, double> allAction = GetAvailableAllActions();
 
-            if ( allAction.ContainsKey(action) == false)
+            if (allAction.ContainsKey(action) == false)
             {
                 return false;
             }
@@ -231,6 +233,7 @@ namespace Assets.Resources.Scripts
             ThreatLion,
             StupidAction,
             Win,
+            ERROR_ACTION,
         }
 
         public EGameState SetActionMove(string start, string end)
@@ -239,21 +242,20 @@ namespace Assets.Resources.Scripts
             EGameState result = EGameState.Continue;
 
             //새로운 기물 놓는지 check
-            if (start.Length < 2 )
+            if (start.Length < 2)
             {
                 actionType = EActionType.Stock;
             }
 
             //(int X, int Y) target_pos = GetPositionFromString(end);
             (int Y, int X) target_pos = GameManager.StringPosToIntPos[end];
-            
+
+
+            BoardSlot targetSlotScript = env.BoardSlots[target_pos.Y, target_pos.X];
 
 
 
-            BoardSlot targetSlotScript = env.BoardSlots[target_pos.Y, target_pos.X];   
-
-
-            switch(actionType)
+            switch (actionType)
             {
                 case EActionType.Piece:
                     {
@@ -264,11 +266,19 @@ namespace Assets.Resources.Scripts
                         (int Y, int X) start_pos = GameManager.StringPosToIntPos[start];
                         BoardSlot startSlotScript = env.BoardSlots[start_pos.Y, start_pos.X];
 
+                        if (startSlotScript.GetPiece().eColor != eCurrentTurn)
+                        {
+                            return EGameState.ERROR_ACTION;
+                            //UnityEngine.Debug.Break();
+
+                        }
+
+
                         Piece startPiece = startSlotScript.GetPiece();
                         startSlotScript.SetPiece(null);
 
-                        
-                        if (targetPiece != null ) //가져온 타겟피스에 기물이 있는 경우
+
+                        if (targetPiece != null) //가져온 타겟피스에 기물이 있는 경우
                         {
                             //잡는 기물이 있는 경우
                             (int color, int pieceID) stockID = BoardStock.GetStockID(targetPiece.pieceID);
@@ -288,7 +298,7 @@ namespace Assets.Resources.Scripts
                                 return result;
                             }
 
-                            if( targetPiece.pieceID == Environment.P1 || targetPiece.pieceID == Environment.P2)
+                            if (targetPiece.pieceID == Environment.P1 || targetPiece.pieceID == Environment.P2)
                             {
                                 result = EGameState.CaptureChick;
                             }
@@ -307,13 +317,13 @@ namespace Assets.Resources.Scripts
 
                             //잡은 피스 삭제
                             Destroy(targetPiece.gameObject);
-                            
+
                         }
 
                         //병아리가 끝까지 도달한 경우
                         //흰색   병아리이 y == 0일 때 
                         //검은색  병아리가 y== 3일때 
-                        if( target_pos.Y == 0 && startPiece.pieceID == Environment.P1)
+                        if (target_pos.Y == 0 && startPiece.pieceID == Environment.P1)
                         {
                             startPiece.Promotion();
                             result = EGameState.Promotion;
@@ -354,6 +364,12 @@ namespace Assets.Resources.Scripts
                         (int color, int pieceID) stockID = GetStockFromString(start);
                         Piece sourcePiece = env.BoardStocks[stockID.color, stockID.pieceID].GetPiece();
 
+                        if (sourcePiece.eColor != eCurrentTurn)
+                        {
+                            return EGameState.ERROR_ACTION;
+                        }
+
+
                         GameObject copy = Instantiate(sourcePiece.gameObject);
                         Piece copyPiece = copy.GetComponent<Piece>();
 
@@ -368,7 +384,7 @@ namespace Assets.Resources.Scripts
                         env.BoardStocks[stockID.color, stockID.pieceID].Count -= 1;
                         env.BoardStocks[stockID.color, stockID.pieceID].SetCount(env.BoardStocks[stockID.color, stockID.pieceID].Count);
 
-                        if(copyPiece.pieceID == Environment.P1 || copyPiece.pieceID == Environment.P2)
+                        if (copyPiece.pieceID == Environment.P1 || copyPiece.pieceID == Environment.P2)
                         {
                             result = EGameState.OnBoardChick;
                         }
@@ -423,10 +439,10 @@ namespace Assets.Resources.Scripts
 
 
             //내가 어떤 액션을 다했는데, 여전히 장군상태인 경우, 스튜핏액션을 한거다.
-            foreach( BoardSlot thisSlot in env.BoardSlots )
+            foreach (BoardSlot thisSlot in env.BoardSlots)
             {
                 //비어있으면 
-                if (thisSlot.GetPiece() == null )
+                if (thisSlot.GetPiece() == null)
                 {
                     continue;
                 }
@@ -437,14 +453,14 @@ namespace Assets.Resources.Scripts
                     continue;
                 }
 
-                if (thisSlot.GetPiece().pieceID == Environment.L1 || thisSlot.GetPiece().pieceID == Environment.L2 )
+                if (thisSlot.GetPiece().pieceID == Environment.L1 || thisSlot.GetPiece().pieceID == Environment.L2)
                 {
                     BoardSlot myLioninSlot = thisSlot;
 
                     //적군 기물들한테, thisSlot에 올 수 있는 친구?
-                    foreach ( BoardSlot enemySlot in env.BoardSlots)
+                    foreach (BoardSlot enemySlot in env.BoardSlots)
                     {
-                        if( enemySlot.GetPiece() == null)
+                        if (enemySlot.GetPiece() == null)
                         {
                             continue;
                         }
@@ -456,7 +472,7 @@ namespace Assets.Resources.Scripts
 
                         var allowedPositionDict = GetPieceMovePositionDict(enemySlot.X, enemySlot.Y, enemySlot.GetPiece().pieceID);
 
-                        if (allowedPositionDict.ContainsKey( (myLioninSlot.Y, myLioninSlot.X) ) == true)
+                        if (allowedPositionDict.ContainsKey((myLioninSlot.Y, myLioninSlot.X)) == true)
                         {
                             return EGameState.StupidAction;
                         }
@@ -486,18 +502,18 @@ namespace Assets.Resources.Scripts
             }
 
 
-            switch(actionResult)
+            switch (actionResult)
             {
                 case EGameState.Promotion:
                     {
                         //UnityEngine.Debug.Log("진화");
-                        Agent[eCurrentTurn].AddReward(+0.025f);
+                        Agent[eCurrentTurn].AddReward(+0.01f);
                         break;
                     }
                 case EGameState.OnBoardGiraph:
                     {
                         //UnityEngine.Debug.Log("기린 놓기");
-                        Agent[eCurrentTurn].AddReward(+0.03f);
+                        Agent[eCurrentTurn].AddReward(+0.025f);
                         break;
                     }
                 case EGameState.OnBoardElephant:
@@ -512,7 +528,7 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("병아리 놓기");
 
-                        Agent[eCurrentTurn].AddReward(+0.01f);
+                        Agent[eCurrentTurn].AddReward(+0.015f);
                         break;
                     }
                 case EGameState.CaptureChick:
@@ -525,15 +541,15 @@ namespace Assets.Resources.Scripts
                 case EGameState.CaptureChicken:
                     {
                         //UnityEngine.Debug.Log("닭 잡기");
-                        Agent[eCurrentTurn].AddReward(+0.035f);
-                        Agent[eOpponent].AddReward(-0.035f);
+                        Agent[eCurrentTurn].AddReward(+0.03f);
+                        Agent[eOpponent].AddReward(-0.03f);
                         break;
                     }
                 case EGameState.CaptureElephant:
                     {
                         //UnityEngine.Debug.Log("코끼리 잡기");
 
-                        Agent[eCurrentTurn].AddReward(+0.02f);
+                        Agent[eCurrentTurn].AddReward(+0.002f);
                         Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
@@ -549,15 +565,12 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("State : Win");
 
-                        Agent[eCurrentTurn].SetReward(1.0f);
+                        Agent[eCurrentTurn].SetReward(+1.0f);
                         Agent[eOpponent].SetReward(-1.0f);
 
-                        
-
+                        //게임이 새로만들어짐
                         Agent[eCurrentTurn].EndEpisode();
                         Agent[eOpponent].EndEpisode();
-
-                        
 
                         break;
                     }
@@ -565,7 +578,7 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("사자 위협");
 
-                        //Agent[eCurrentTurn].AddReward(0.1f);
+                        Agent[eCurrentTurn].AddReward(+0.01f);
                         //Agent[eOpponent].AddReward(-0.1f);
                         break;
                     }
@@ -574,15 +587,15 @@ namespace Assets.Resources.Scripts
                         //일반
                         //UnityEngine.Debug.Log("일반 움직임");
                         Agent[eCurrentTurn].AddReward(-0.001f);
+                        //Agent[eOpponent].AddReward(0f);
                         break;
                     }
                 case EGameState.StupidAction:
                     {
                         //UnityEngine.Debug.Log("자충수");
-
                         Agent[eCurrentTurn].SetReward(-1.0f);
-                        Agent[eOpponent].SetReward(0.0f);
-                        
+                        Agent[eOpponent].AddReward(0.2f);
+
                         Agent[eCurrentTurn].EndEpisode();
                         Agent[eOpponent].EndEpisode();
 
@@ -601,7 +614,7 @@ namespace Assets.Resources.Scripts
 
         public bool CheckTurn(SharedDataType.EColor color)
         {
-            if( eCurrentTurn == color )
+            if (eCurrentTurn == color)
             {
                 return true;
             }
@@ -678,7 +691,7 @@ namespace Assets.Resources.Scripts
         {
             int pieceID = 0;
 
-            switch(stock_str)
+            switch (stock_str)
             {
                 case "P":
                 case "C":
@@ -709,7 +722,7 @@ namespace Assets.Resources.Scripts
         //사람용
         public void MoveTry(int target_x, int target_y)
         {
-            if( start_pos_str == "")
+            if (start_pos_str == "")
             {
                 return;
             }
@@ -722,7 +735,7 @@ namespace Assets.Resources.Scripts
             //현재 액션을 숫자 변환을 한다 
             double action = Decoder.encode_to_action_index(start_pos_str, target_pos_str, (double)eCurrentTurn);
 
-            
+
 
             //해당 액션이 적법한지 체크
             if (CheckAction(action) == false)
@@ -733,7 +746,7 @@ namespace Assets.Resources.Scripts
 
                 //셀렉트 피스 초기화
                 UnSelectedPiece();
-                return ;
+                return;
             }
 
             //stock or piece
@@ -748,41 +761,42 @@ namespace Assets.Resources.Scripts
             //게임 종료
 
             //if(SetActionMove(start_pos_str, target_pos_str) == EGameState.Win)
-            
-                //ResetGame();
-                //return false;
-            
-            var results = SetActionMove(start_pos_str, target_pos_str);
-            isEnvironmentInit = false;
 
-            if (results == EGameState.Win ) 
+            //ResetGame();
+            //return false;
+
+            var results = SetActionMove(start_pos_str, target_pos_str);
+            //isEnvironmentInit = false;
+
+            if (results == EGameState.Win)
             {
-                
-                SetReward(results);
+
+                //SetReward(results);
+                ResetGame();
                 return;
             }
 
             //테스트용 함수
-            SetReward(results);
+            //SetReward(results);
 
             //셀렉트 피스 초기화
             UnSelectedPiece();
 
-            //턴 변경
-            if( isEnvironmentInit == true)
-            {
-                return;
-            }
+            //턴 변경 //게임이 끝났다면 체인지 턴하지 않고 끝
+            //if( //isEnvironmentInit == true)
+            //{
+            //    return;
+            //}
 
             ChangeTurn();
 
-            return ;
+            return;
 
         }
 
         public void ChangeTurn()
         {
-            if (eCurrentTurn == SharedDataType.EColor.White )
+            if (eCurrentTurn == SharedDataType.EColor.White)
             {
                 eCurrentTurn = SharedDataType.EColor.Black;
             }
@@ -810,7 +824,7 @@ namespace Assets.Resources.Scripts
 
         public Dictionary<double, double> GetAvailableAllActions()
         {
-            Dictionary<double,double> actions = new Dictionary<double,double>();
+            Dictionary<double, double> actions = new Dictionary<double, double>();
 
             List<BoardSlot> emptySlot = new List<BoardSlot>();
 
@@ -826,14 +840,14 @@ namespace Assets.Resources.Scripts
                     Piece piece = slot.GetPiece();
 
                     //슬롯에 기물이 없는 경우 패스
-                    if(piece == null)
+                    if (piece == null)
                     {
                         emptySlot.Add(slot);
                         continue;
                     }
 
                     //기물의 색이 현재 턴과 다른 경우 패스
-                    if( piece.eColor != eCurrentTurn )
+                    if (piece.eColor != eCurrentTurn)
                     {
                         continue;
                     }
@@ -958,7 +972,7 @@ namespace Assets.Resources.Scripts
         }
 
 
-        public Dictionary<(int Y, int X) , (int Y, int X)> GetPieceMovePositionDict(int start_x, int start_y, int pieceID)
+        public Dictionary<(int Y, int X), (int Y, int X)> GetPieceMovePositionDict(int start_x, int start_y, int pieceID)
         {
             (int dirY, int dirX)[] allowed_moves = ALLOWED_MOVES[pieceID];
 
@@ -1024,7 +1038,7 @@ namespace Assets.Resources.Scripts
 
             SharedDataType.EColor targetColor = target_piece.eColor;
 
-            if(pieceColor == targetColor)
+            if (pieceColor == targetColor)
             {
                 //아군
                 return false;
@@ -1059,13 +1073,13 @@ namespace Assets.Resources.Scripts
 
                 //피스가 있는가?
                 BoardSlot targetSlotScript = env.BoardSlots[allowed_position[i].Y, allowed_position[i].X];
-                if( targetSlotScript.HasPiece() == false )
+                if (targetSlotScript.HasPiece() == false)
                 {
                     continue;
                 }
 
 
-                if ( targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2 )
+                if (targetSlotScript.GetPiece().pieceID == Environment.L1 || targetSlotScript.GetPiece().pieceID == Environment.L2)
                 {
                     return true;
                 }
@@ -1120,10 +1134,10 @@ namespace Assets.Resources.Scripts
         public void UnSelectedPiece()
         {
             start_pos_str = "";
-            
+
             if (SelectedPiece != null)
             {
-                
+
                 SelectedPiece.CancleSelected();
                 SelectedPiece.transform.localPosition = Vector3.zero;
 
@@ -1132,7 +1146,7 @@ namespace Assets.Resources.Scripts
 
         public void DestorySelectedPiece()
         {
-            if(SelectedPiece == null)
+            if (SelectedPiece == null)
             {
                 return;
             }
@@ -1140,7 +1154,7 @@ namespace Assets.Resources.Scripts
             //start_pos_str = "";
             Destroy(SelectedPiece.gameObject);
             SelectedPiece = null;
-            
+
         }
 
         public bool InactiveVisualizeMovePath()

@@ -85,13 +85,10 @@ namespace Assets.Resources.Scripts
         public override void OnEpisodeBegin()
 		{
 
-			if (ruleManager.isEnvironmentInit == false)
-			{
-				ruleManager.ResetGame();
-			}
 
 
-		}
+
+        }
 
 		public override void CollectObservations(VectorSensor sensor)
 		{
@@ -115,26 +112,23 @@ namespace Assets.Resources.Scripts
         {
             int action = actionBuffers.DiscreteActions[0];
 
-			//액션 디코딩 후 
-
-			if (ruleManager.GetAvailableAllActions().ContainsKey(action) == false)
-			{
-				return;
-			}
-
-
-			int[,] boardState = ruleManager.env.GetCurrentBoardState();
-
-			(string start, string dest) pos = Decoder.action_to_stringTuple(action, boardState);
+			(string start, string dest) pos = Decoder.action_to_stringTuple(action);
 
 			AnimalRuleManager.EGameState actionResult = ruleManager.SetActionMove(pos.start, pos.dest);
-			ruleManager.isEnvironmentInit = false;
+
+			//  1 ,2 ,3
+			//a 1a 2a 3a
+			//b 1b 2b 3b
+			//c 1c 2c 3c
+			//d 1d 2d 3d 
 
 			//게임이 끝났을 수도 있음
 			ruleManager.SetReward(actionResult);
 
-			if ((actionResult == AnimalRuleManager.EGameState.StupidAction) || (actionResult == AnimalRuleManager.EGameState.Win))
+
+			if ((actionResult == AnimalRuleManager.EGameState.Win || actionResult == AnimalRuleManager.EGameState.StupidAction))
 			{
+				ruleManager.ResetGame();
 				return;
 			}
 

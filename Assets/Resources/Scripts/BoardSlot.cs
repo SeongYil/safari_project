@@ -83,10 +83,10 @@ namespace Assets.Resources.Scripts
 
         }
 
+        //학습용 주석
         // Update is called once per frame
         void Update()
         {
-
 
             //if (ruleManager == null)
             //    return;
@@ -99,7 +99,7 @@ namespace Assets.Resources.Scripts
                 {
                     return;
                 }
-                    
+
                 //if(hasPiece.transform.position.Equals(Vector3.zero) == true )
                 //{
                 //    return;
@@ -157,7 +157,7 @@ namespace Assets.Resources.Scripts
                 //매니저야 여기서 마우스 업했엉
                 //
                 ruleManager.MoveTry(X, Y);
-                ruleManager.isEnvironmentInit = false;
+                //ruleManager.isEnvironmentInit = false;
                 
             }
 

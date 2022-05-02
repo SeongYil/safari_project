@@ -83,7 +83,7 @@ namespace Assets.Resources.Scripts
 
         static string[] PieceStringID_Five = new string[5] { "L", "E", "G", "P","C"};
         static string[] PieceStringID_Three = new string[3] { "E", "G", "P" };
-        public static (string, string) action_to_stringTuple(double action_num, int[,] board)
+        public static (string, string) action_to_stringTuple(double action_num)
         {
 
 

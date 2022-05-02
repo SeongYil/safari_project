@@ -165,7 +165,8 @@ namespace Assets.Resources.Scripts
                 {
                     ControllerEnvrionment = ruleManager;
                 }
-                
+
+                ruleManager.gameID = i;
 
             }
 
@@ -176,9 +177,11 @@ namespace Assets.Resources.Scripts
 
         }
 
+        //학습용 주석
         // Update is called once per frame
         void Update()
         {
+
             if (Input.GetMouseButtonDown(1))
             {
                 Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
