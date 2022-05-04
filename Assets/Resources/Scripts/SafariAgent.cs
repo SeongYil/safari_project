@@ -23,7 +23,7 @@ namespace Assets.Resources.Scripts
 		public Unity.MLAgents.Policies.BehaviorParameters behaviorParameters;
 
 		private int AllActionSize = 360;
-		private int AllObservationSize = 18;
+		private int AllObservationSize = 16 * 4 * 3;
 
 		public void InitializeAgent(AnimalRuleManager animalRulemanager, string name, SharedDataType.EColor colorType)
 		{
@@ -33,7 +33,7 @@ namespace Assets.Resources.Scripts
 			behaviorParameters = GetComponent<Unity.MLAgents.Policies.BehaviorParameters>();
 			behaviorParameters.BehaviorName = name;
 			behaviorParameters.BrainParameters.VectorObservationSize = AllObservationSize;
-			behaviorParameters.BrainParameters.NumStackedVectorObservations = 1;
+			behaviorParameters.BrainParameters.NumStackedVectorObservations = 3;
 			behaviorParameters.TeamId = (int)colorType;
 
 			int[] brancheSize = new int[1] { AllActionSize };
@@ -76,14 +76,26 @@ namespace Assets.Resources.Scripts
 			int[,] boardState = ruleManager.env.GetCurrentBoardState();
 			int[,] stockState = ruleManager.env.GetCurrentStockState();
 
-			foreach (int pieceID in boardState)
-			{
-				sensor.AddObservation(pieceID);
-			}
 
-			foreach (int stockCount in stockState)
-			{
-				sensor.AddObservation(stockCount);
+			int [,,] obs = Decoder.get_observation(boardState, stockState);
+
+
+
+
+
+			//foreach (int pieceID in boardState)
+			//{
+			//	sensor.AddObservation(pieceID);
+			//}
+
+			//foreach (int stockCount in stockState)
+			//{
+			//	sensor.AddObservation(stockCount);
+			//}
+
+			foreach(int data in obs)
+            {
+				sensor.AddObservation(data);
 			}
 
 
@@ -91,12 +103,9 @@ namespace Assets.Resources.Scripts
 
 		public override void OnActionReceived(ActionBuffers actionBuffers)
 		{
-			int action = actionBuffers.DiscreteActions[0];
 
-			//if( ruleManager.GetAvailableAllActions().ContainsKey(action) == false )
-   //         {
-			//	return;
-   //         }
+
+			int action = actionBuffers.DiscreteActions[0];
 
 			(string start, string dest) pos = Decoder.action_to_stringTuple(action);
 
@@ -108,33 +117,24 @@ namespace Assets.Resources.Scripts
 			//c 1c 2c 3c
 			//d 1d 2d 3d 
 
-			//게임이 끝났을 수도 있음
-			ruleManager.SetReward(actionResult);
-
-			//if (actionResult == AnimalRuleManager.EGameState.ERROR_ACTION)
-			//{
-			//	//UnityEngine.Debug.Log("Action Error");
-			//	ruleManager.Agent[SharedDataType.EColor.Black].EpisodeInterrupted();
-			//	ruleManager.Agent[SharedDataType.EColor.White].EpisodeInterrupted();
-			//	ruleManager.ResetGame();
-
-
-
-			//	return;
-			//}
-
-			if (actionResult == AnimalRuleManager.EGameState.Win)
-			{
-				Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
-				ruleManager.ResetGame();
-				Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
-				return;
+			if(GameManager.instance.ReleaseMode == false)
+            {
+				//학습
+				ruleManager.SetReward(actionResult);
 			}
 
-			ruleManager.ChangeTurn();
+            if (actionResult == AnimalRuleManager.EGameState.Win)
+            {
+				ruleManager.Agent[SharedDataType.EColor.White].EndEpisode();
+				ruleManager.Agent[SharedDataType.EColor.Black].EndEpisode();
+				ruleManager.EndepiosodeState = true;
+                return;
+            }
+
+            ruleManager.ChangeTurn();
 
 
-		}
+        }
 
 		public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
 		{
@@ -158,9 +158,6 @@ namespace Assets.Resources.Scripts
 
 		}
 
-		//public override void Heuristic(in ActionBuffers actionsOut)
-		//{
 
-		//}
-	}
+    }
 }

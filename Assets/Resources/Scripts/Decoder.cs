@@ -138,9 +138,9 @@ namespace Assets.Resources.Scripts
 
 
         // get_observation
-        public static double[,,] get_observation(double[,] board, double[,] stocks, double to_play)
+        public static int[,,] get_observation(int[,] board, int[,] stocks)
         {
-            double[,,] array = new double[17, 4, 3];
+            int[,,] array = new int[16, 4, 3];
             for (int k = 0; k < 10; k++)
             {
                 for (int i = 0; i < 4; i++)
@@ -158,6 +158,7 @@ namespace Assets.Resources.Scripts
                     }
                 }
             }
+            //0 코끼리, 1 기린, 2 병아리
             int idx = 10;
             for (int p = 0; p < 2; p++)
             {
@@ -167,19 +168,19 @@ namespace Assets.Resources.Scripts
                     {
                         for (int j = 0; j < 3; j++)
                         {
-                            array[idx, i, j] = Math.Truncate((double)stocks[p, k] / 2);
+                            array[idx, i, j] = stocks[p, k];
                         }
                     }
                     idx += 1;
                 }
             }
-            for (int i = 0; i < 4; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    array[16, i, j] = 1 - (2 * to_play);
-                }
-            }
+            //for (int i = 0; i < 4; i++)
+            //{
+            //    for (int j = 0; j < 3; j++)
+            //    {
+            //        array[16, i, j] = 1 - (2 * to_play);
+            //    }
+            //}
             return array;
         }
     }

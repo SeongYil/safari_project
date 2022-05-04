@@ -236,11 +236,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ReleaseMode: 0
+  MenuBoardObj: {fileID: 0}
+  MenuButtonObj: {fileID: 0}
+  TurnBoardObj: {fileID: 0}
   HumanColor: 2
   BlackModel: {fileID: 0}
   WhiteModel: {fileID: 0}
   isTraining: 0
-  EnvironmentCount: 16
+  EnvironmentCount: 64
 --- !u!4 &1044961574
 Transform:
   m_ObjectHideFlags: 0

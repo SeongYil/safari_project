@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets.Resources.Scripts
 {
@@ -9,6 +10,14 @@ namespace Assets.Resources.Scripts
     public class GameManager : MonoBehaviour
     {
         public static GameManager instance;
+
+        public enum GameState
+        {
+            PLAY,
+            PAUSE,
+        }
+
+        GameState eGameState = GameState.PAUSE;
 
         //This is Main Camera in the Scene
         Camera m_MainCamera;
@@ -22,7 +31,8 @@ namespace Assets.Resources.Scripts
         public bool ReleaseMode = false;
 
         public GameObject MenuBoardObj = null;
-        public GameObject MenuButton = null;
+        public GameObject MenuButtonObj = null;
+        public GameObject TurnBoardObj = null;
 
         public SharedDataType.EColor HumanColor = SharedDataType.EColor.White;
 
@@ -32,6 +42,8 @@ namespace Assets.Resources.Scripts
         private Sprite[] NumberSprite = null;
         private Dictionary<string, Sprite> number_sprite_dictionary = null;
 
+        private Color32 black = new Color32(0, 0, 0, 255);
+        private Color32 white = new Color32(255, 255, 255, 255);
 
         public bool isTraining = false;
         public int EnvironmentCount = 1;
@@ -39,11 +51,13 @@ namespace Assets.Resources.Scripts
         static public Dictionary<(int y, int x), string> intPosToStringPos = new Dictionary<(int y, int x), string>();
         static public Dictionary<string, (int y, int x)> StringPosToIntPos = new Dictionary<string, (int y, int x)>();
 
+
+        Image TurnImage;
+
         private AnimalRuleManager ControllerEnvrionment = null;
         private void Awake()
         {
             instance = this;
-            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
 
             PieceManager.CreatePieceManager();
 
@@ -98,13 +112,16 @@ namespace Assets.Resources.Scripts
 
             BoardManager.InitializeBoard();
 
-            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
 
             //만약 Release 모드라면 선후공 페이지 생성  
             if (ReleaseMode == true)
             {
-                // 선 후공 메뉴 생성 
 
+                //TurnImage = TurnBoardObj.GetComponent<Image>();
+
+                // 선 후공 메뉴 생성 
+                //MenuBoardObj.SetActive(true);
+                
                 // 컨트롤하고 있는 게임룰 매니저의 Agent의 모드 변경
 
             }
@@ -112,6 +129,25 @@ namespace Assets.Resources.Scripts
 
 
         }
+
+        public void SetHumanFirst()
+        {
+            HumanColor = SharedDataType.EColor.White;
+
+            ControllerEnvrionment.ResetGame();
+
+            MenuBoardObj.SetActive(false);
+        }
+
+        public void SetHumanSecond()
+        {
+            HumanColor = SharedDataType.EColor.Black;
+            ControllerEnvrionment.ResetGame();
+
+            MenuBoardObj.SetActive(false);
+
+        }
+
 
         public Sprite GetSpriteNumber(int number)
         {
@@ -158,6 +194,13 @@ namespace Assets.Resources.Scripts
                 if (i == 0)
                 {
                     ControllerEnvrionment = ruleManager;
+
+                    if(ReleaseMode)
+                    {
+                        ControllerEnvrionment.delegateChange = SetTurnColor;
+                    }
+                    
+
                 }
                 ruleManager.gameID = i;
 
@@ -166,20 +209,18 @@ namespace Assets.Resources.Scripts
 
         }
 
-
-        private void OnEnable()
+        public void SetTurnColor(SharedDataType.EColor eColor)
         {
-            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
-            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
-            //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
+            
 
-            //isTraining = true;
-
-        }
-
-        private void OnDisable()
-        {
-            //isTraining = false;
+            if( eColor ==  SharedDataType.EColor.Black)
+            {
+                TurnImage.color = Color.black;
+            }
+            else
+            {
+                TurnImage.color = Color.white;
+            }
             
         }
 
@@ -187,16 +228,6 @@ namespace Assets.Resources.Scripts
         // Update is called once per frame
         void Update()
         {
-            if (isTraining)
-            {
-                //Unity.MLAgents.Academy.Instance.EnvironmentStep();
-            }
-
-            //if (Unity.MLAgents.Academy.Instance.IsCommunicatorOn == false)
-            //{
-                //Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
-            ///}
-
             if (Input.GetMouseButtonDown(1))
             {
                 Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;

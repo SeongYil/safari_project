@@ -52,17 +52,31 @@ namespace Assets.Resources.Scripts
 
 
         //# move direction
-        (int dirY, int dirX) UL = (-1, -1);
-        (int dirY, int dirX) UU = (-1, 0);
-        (int dirY, int dirX) UR = (-1, 1);
-        (int dirY, int dirX) ML = (0, -1);
-        (int dirY, int dirX) MR = (0, 1);
-        (int dirY, int dirX) DL = (1, -1);
-        (int dirY, int dirX) DD = (1, 0);
-        (int dirY, int dirX) DR = (1, 1);
+        static (int dirY, int dirX) UL = (-1, -1);
+        static (int dirY, int dirX) UU = (-1, 0);
+        static (int dirY, int dirX) UR = (-1, 1);
+        static (int dirY, int dirX) ML = (0, -1);
+        static (int dirY, int dirX) MR = (0, 1);
+        static (int dirY, int dirX) DL = (1, -1);
+        static (int dirY, int dirX) DD = (1, 0);
+        static (int dirY, int dirX) DR = (1, 1);
 
 
-        Dictionary<int, (int dirY, int dirX)[]> ALLOWED_MOVES = null;
+        Dictionary<int, (int dirY, int dirX)[]> ALLOWED_MOVES = new Dictionary<int, (int dirY, int dirX)[]>()
+        {
+            [Environment.L1] = new (int dirY, int dirX)[] { UL, UU, UR, ML, MR, DL, DD, DR},
+            [Environment.L2] = new (int dirY, int dirX)[] { UL, UU, UR, ML, MR, DL, DD, DR},
+            [Environment.E1] = new (int dirY, int dirX)[] { UL, UR, DL, DR },
+            [Environment.E2] = new (int dirY, int dirX)[] { UL, UR, DL, DR },
+            [Environment.G1] = new (int dirY, int dirX)[] { UU, ML, MR, DD },
+            [Environment.G2] = new (int dirY, int dirX)[] { UU, ML, MR, DD },
+            [Environment.P1] = new (int dirY, int dirX)[] { UU },
+            [Environment.P2] = new (int dirY, int dirX)[] { DD },
+            [Environment.C1] = new (int dirY, int dirX)[] { UL, UU, UR, ML, MR, DD },
+            [Environment.C2] = new (int dirY, int dirX)[] { DL, DD, DR, ML, MR, UU },
+
+        };
+
 
 
         //public bool isEnvironmentInit = true;
@@ -75,8 +89,10 @@ namespace Assets.Resources.Scripts
 
         public Dictionary<SharedDataType.EColor, SafariAgent> Agent = new Dictionary<SharedDataType.EColor, SafariAgent>();
 
+        public bool EndepiosodeState = false;
 
 
+        public SharedDataType.EColor beforeColor = SharedDataType.EColor.Count;
 
         public SharedDataType.EColor eCurrentTurn = SharedDataType.EColor.White;
 
@@ -105,30 +121,13 @@ namespace Assets.Resources.Scripts
         public void Initialize(Environment animalGame)
         {
             env = animalGame;
-
-            ALLOWED_MOVES = new Dictionary<int, (int dirY, int dirX)[]>()
-            {
-                [Environment.L1] = new (int dirY, int dirX)[] { UL, UU, UR, ML, MR, DL, DD, DR },
-                [Environment.L2] = new (int dirY, int dirX)[] { UL, UU, UR, ML, MR, DL, DD, DR },
-                [Environment.E1] = new (int dirY, int dirX)[] { UL, UR, DL, DR },
-                [Environment.E2] = new (int dirY, int dirX)[] { UL, UR, DL, DR },
-                [Environment.G1] = new (int dirY, int dirX)[] { UU, ML, MR, DD },
-                [Environment.G2] = new (int dirY, int dirX)[] { UU, ML, MR, DD },
-                [Environment.P1] = new (int dirY, int dirX)[] { UU },
-                [Environment.P2] = new (int dirY, int dirX)[] { DD },
-                [Environment.C1] = new (int dirY, int dirX)[] { UL, UU, UR, ML, MR, DD },
-                [Environment.C2] = new (int dirY, int dirX)[] { DL, DD, DR, ML, MR, UU },
-
-            };
-
-
-
-
-
         }
 
         public void SetPlayer()
         {
+            if (Agent.Count == 0)
+                return;
+
             if (GameManager.instance.HumanColor == SharedDataType.EColor.White)
             {
                 Agent[SharedDataType.EColor.Black].enabled = true;
@@ -153,13 +152,16 @@ namespace Assets.Resources.Scripts
         {
 
             SetPlayer();
+            EndepiosodeState = false;
 
         }
 
         private void OnDisable()
         {
-            Agent[SharedDataType.EColor.White].enabled = true;
-            Agent[SharedDataType.EColor.Black].enabled = true;
+            EndepiosodeState = true;
+            
+            Agent[SharedDataType.EColor.White].enabled = false;
+            Agent[SharedDataType.EColor.Black].enabled = false;
         }
 
         private void Awake()
@@ -169,12 +171,9 @@ namespace Assets.Resources.Scripts
             environment.transform.localPosition = new Vector3(0, 0, 0);
             Environment env = new Environment();
             Initialize(env);
-
-            //Agent 생성
-            InitializeAgent();
-
             env.Initialize(this, environment.transform);
 
+            
 
         }
 
@@ -182,7 +181,15 @@ namespace Assets.Resources.Scripts
         void Start()
         {
 
+            //Agent 생성
+            InitializeAgent();
+            ResetGame();
+            
         }
+
+
+
+
 
         // Update is called once per frame
         void Update()
@@ -191,12 +198,36 @@ namespace Assets.Resources.Scripts
             //if(Agent[eCurrentTurn].behaviorParameters.BehaviorType == Unity.MLAgents.Policies.BehaviorType.Default)
             //{
             //UnityEngine.Debug.Log(Agent[eCurrentTurn].GetCumulativeReward());
-            if(Agent[eCurrentTurn].enabled == true)
+
+            if (EndepiosodeState == true)
             {
-                Agent[eCurrentTurn].RequestDecision();
+                if( Agent[SharedDataType.EColor.Black].enabled )
+                {
+                    Agent[SharedDataType.EColor.Black].EndEpisode();
+                }
+
+                if( Agent[SharedDataType.EColor.White].enabled )
+                {
+                    Agent[SharedDataType.EColor.White].EndEpisode();
+                }
                 
+                ResetGame();
+                EndepiosodeState = false;
             }
-                
+
+
+            if (Agent[eCurrentTurn].enabled)
+            {
+
+                if(eCurrentTurn == beforeColor)
+                {
+                    return;
+                }
+
+                Agent[eCurrentTurn].RequestDecision();
+                beforeColor = eCurrentTurn;
+
+            }
             
             //ChangeTurn();
             //}
@@ -236,17 +267,18 @@ namespace Assets.Resources.Scripts
             Agent[SharedDataType.EColor.White].enabled = false;
 
             eCurrentTurn = SharedDataType.EColor.White;
-            GameObject envObj = env.GetEnvironmentObj();
-            Destroy(envObj);
+            beforeColor = SharedDataType.EColor.Count;
+            //GameObject envObj = env.GetEnvironmentObj();
+            //Destroy(envObj);
 
-            GameObject environment = new GameObject("Environment");
-            environment.transform.parent = transform;
-            environment.transform.localPosition = new Vector3(0, 0, 0);
-
-            Environment newEnv = new Environment();
-            Initialize(newEnv);
-
-            env.Initialize(this, environment.transform);
+            //GameObject environment = new GameObject("Environment");
+            //environment.transform.parent = transform;
+            //environment.transform.localPosition = new Vector3(0, 0, 0);
+            env.ResetEnvironment();
+            //Environment newEnv = new Environment();
+            //Initialize(newEnv);
+            
+            //env.Initialize(this, env.GetEnvironmentObj(). transform);
 
             SetPlayer();
 
@@ -322,15 +354,17 @@ namespace Assets.Resources.Scripts
                         (int Y, int X) start_pos = GameManager.StringPosToIntPos[start];
                         BoardSlot startSlotScript = env.BoardSlots[start_pos.Y, start_pos.X];
 
+                        if (startSlotScript.GetPiece() == null )
+                        {
+                            return EGameState.ERROR_ACTION;
+                        }
                         if (startSlotScript.GetPiece().eColor != eCurrentTurn)
                         {
                             return EGameState.ERROR_ACTION;
                         }
 
 
-                        Piece startPiece = startSlotScript.GetPiece();
-                        startSlotScript.SetPiece(null);
-
+                        
 
                         if (targetPiece != null) //가져온 타겟피스에 기물이 있는 경우
                         {
@@ -349,6 +383,7 @@ namespace Assets.Resources.Scripts
                             if (targetPiece.pieceID == Environment.L1 || targetPiece.pieceID == Environment.L2)
                             {
                                 result = EGameState.Win;
+                                targetSlotScript.DestoryHasPiece();
                                 return result;
                             }
 
@@ -370,8 +405,16 @@ namespace Assets.Resources.Scripts
                             }
 
                             //잡은 피스 삭제
-                            Destroy(targetPiece.gameObject);
+                            targetSlotScript.DestoryHasPiece();
 
+                        }
+
+
+                        Piece startPiece = startSlotScript.DetachPiece();
+
+                        if(startPiece == null)
+                        {
+                            return EGameState.ERROR_ACTION;
                         }
 
                         //병아리가 끝까지 도달한 경우
@@ -392,6 +435,7 @@ namespace Assets.Resources.Scripts
                         {
                             //끝까지 갔음
                             result = EGameState.Win;
+                            Destroy(startPiece.gameObject);
                             return result;
                         }
 
@@ -399,6 +443,7 @@ namespace Assets.Resources.Scripts
                         {
                             //끝까지 갔음
                             result = EGameState.Win;
+                            Destroy(startPiece.gameObject);
                             return result;
                         }
 
@@ -418,35 +463,40 @@ namespace Assets.Resources.Scripts
                         (int color, int pieceID) stockID = GetStockFromString(start);
                         Piece sourcePiece = env.BoardStocks[stockID.color, stockID.pieceID].GetPiece();
 
+                        if (sourcePiece == null)
+                        {
+                            return EGameState.ERROR_ACTION;
+                        }
+
                         if (sourcePiece.eColor != eCurrentTurn)
                         {
                             return EGameState.ERROR_ACTION;
                         }
 
 
-                        GameObject copy = Instantiate(sourcePiece.gameObject);
-                        Piece copyPiece = copy.GetComponent<Piece>();
+                        GameObject newPiece = PieceManager.instance.CreatePiece(sourcePiece.pieceID);
+                        Piece newPieceScript = newPiece.GetComponent<Piece>();
 
 
-                        targetSlotScript.SetPiece(copyPiece);
-                        copyPiece.transform.localScale = new Vector3(1, 1, 0);
-                        copyPiece.transform.parent = targetSlotScript.transform;
-                        copyPiece.transform.localPosition = Vector3.zero;
+                        targetSlotScript.SetPiece(newPieceScript);
+                        newPiece.transform.localScale = new Vector3(1, 1, 0);
+                        newPiece.transform.parent = targetSlotScript.transform;
+                        newPiece.transform.localPosition = Vector3.zero;
 
 
                         //스톡 카운터 감소 
                         env.BoardStocks[stockID.color, stockID.pieceID].Count -= 1;
-                        env.BoardStocks[stockID.color, stockID.pieceID].SetCount(env.BoardStocks[stockID.color, stockID.pieceID].Count);
+                        env.BoardStocks[stockID.color, stockID.pieceID].SetImage(env.BoardStocks[stockID.color, stockID.pieceID].Count);
 
-                        if (copyPiece.pieceID == Environment.P1 || copyPiece.pieceID == Environment.P2)
+                        if (newPieceScript.pieceID == Environment.P1 || newPieceScript.pieceID == Environment.P2)
                         {
                             result = EGameState.OnBoardChick;
                         }
-                        else if (copyPiece.pieceID == Environment.G1 || copyPiece.pieceID == Environment.G2)
+                        else if (newPieceScript.pieceID == Environment.G1 || newPieceScript.pieceID == Environment.G2)
                         {
                             result = EGameState.OnBoardGiraph;
                         }
-                        else if (copyPiece.pieceID == Environment.E1 || copyPiece.pieceID == Environment.E2)
+                        else if (newPieceScript.pieceID == Environment.E1 || newPieceScript.pieceID == Environment.E2)
                         {
                             result = EGameState.OnBoardElephant;
                         }
@@ -561,14 +611,14 @@ namespace Assets.Resources.Scripts
                 case EGameState.Promotion:
                     {
                         //UnityEngine.Debug.Log("진화");
-                        Agent[eCurrentTurn].AddReward(+0.01f);
+                        //Agent[eCurrentTurn].AddReward(+0.01f);
                         //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.OnBoardGiraph:
                     {
                         //UnityEngine.Debug.Log("기린 놓기");
-                        Agent[eCurrentTurn].AddReward(+0.02f);
+                        //Agent[eCurrentTurn].AddReward(+0.02f);
                         //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
@@ -577,44 +627,44 @@ namespace Assets.Resources.Scripts
 
                         //UnityEngine.Debug.Log("코끼리 놓기");
 
-                        Agent[eCurrentTurn].AddReward(+0.015f);
+                        //Agent[eCurrentTurn].AddReward(+0.015f);
                         //Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
                 case EGameState.OnBoardChick:
                     {
                         //UnityEngine.Debug.Log("병아리 놓기");
-                        Agent[eCurrentTurn].AddReward(+0.01f);
+                        //Agent[eCurrentTurn].AddReward(+0.01f);
                         break;
                     }
                 case EGameState.CaptureChick:
                     {
                         //UnityEngine.Debug.Log("병아리 잡기");
-                        Agent[eCurrentTurn].AddReward(+0.01f);
-                        Agent[eOpponent].AddReward(-0.01f);
+                        //Agent[eCurrentTurn].AddReward(+0.01f);
+                        //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
                 case EGameState.CaptureChicken:
                     {
                         //UnityEngine.Debug.Log("닭 잡기");
-                        Agent[eCurrentTurn].AddReward(+0.03f);
-                        Agent[eOpponent].AddReward(-0.03f);
+                        //Agent[eCurrentTurn].AddReward(+0.03f);
+                        //Agent[eOpponent].AddReward(-0.03f);
                         break;
                     }
                 case EGameState.CaptureElephant:
                     {
                         //UnityEngine.Debug.Log("코끼리 잡기");
 
-                        Agent[eCurrentTurn].AddReward(+0.02f);
-                        Agent[eOpponent].AddReward(-0.02f);
+                        //Agent[eCurrentTurn].AddReward(+0.02f);
+                        //Agent[eOpponent].AddReward(-0.02f);
                         break;
                     }
                 case EGameState.CaptureGiraph:
                     {
                         //UnityEngine.Debug.Log("기린 잡기");
 
-                        Agent[eCurrentTurn].AddReward(+0.03f);
-                        Agent[eOpponent].AddReward(-0.03f);
+                        //Agent[eCurrentTurn].AddReward(+0.03f);
+                        //Agent[eOpponent].AddReward(-0.03f);
                         break;
                     }
                 case EGameState.Win:
@@ -624,9 +674,7 @@ namespace Assets.Resources.Scripts
                         Agent[eCurrentTurn].SetReward(+1.0f);
                         Agent[eOpponent].SetReward(-1.0f);
 
-                        //게임이 새로만들어짐
-                        Agent[eCurrentTurn].EndEpisode();
-                        Agent[eOpponent].EndEpisode();
+
 
                         break;
                     }
@@ -634,7 +682,7 @@ namespace Assets.Resources.Scripts
                     {
                         //UnityEngine.Debug.Log("사자 위협");
 
-                        Agent[eCurrentTurn].AddReward(+0.01f);
+                        //Agent[eCurrentTurn].AddReward(+0.01f);
                         //Agent[eOpponent].AddReward(-0.01f);
                         break;
                     }
@@ -643,15 +691,15 @@ namespace Assets.Resources.Scripts
                         //일반
                         //UnityEngine.Debug.Log("일반 움직임");
                         //Agent[eCurrentTurn].AddReward(-1.001f);
-                        Agent[eCurrentTurn].AddReward(-0.001f);
+                        //Agent[eCurrentTurn].AddReward(-0.001f);
                         //Agent[eOpponent].AddReward(0f);
                         break;
                     }
                 case EGameState.StupidAction:
                     {
                         //UnityEngine.Debug.Log("자충수");
-                        Agent[eCurrentTurn].AddReward(-0.1f);
-                        Agent[eOpponent].AddReward(+0.1f);
+                        //Agent[eCurrentTurn].AddReward(-0.1f);
+                        //Agent[eOpponent].AddReward(+0.1f);
 
                         //Agent[eCurrentTurn].EndEpisode();
                         //Agent[eOpponent].EndEpisode();
@@ -660,7 +708,7 @@ namespace Assets.Resources.Scripts
                     }
                 default:
                     {
-                        UnityEngine.Debug.Log("actionResult Warning");
+                        //UnityEngine.Debug.Log("actionResult Warning");
                         break;
                     }
             }
@@ -827,11 +875,12 @@ namespace Assets.Resources.Scripts
 
             if (results == EGameState.Win)
             {
-
-                //SetReward(results);
-                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
+                GameManager.instance.MenuBoardObj.SetActive(true);
+                //게임이 새로만들어짐
+                //Agent[eCurrentTurn].EndEpisode();
+                //Agent[(SharedDataType.EColor)opponent].EndEpisode();
+                
                 ResetGame();
-                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
                 return;
             }
 
@@ -853,6 +902,13 @@ namespace Assets.Resources.Scripts
 
         }
 
+        public delegate void DelegateChangeTurn(SharedDataType.EColor eColor);
+
+
+        public DelegateChangeTurn delegateChange;
+
+
+
         public void ChangeTurn()
         {
             if (eCurrentTurn == SharedDataType.EColor.White)
@@ -863,6 +919,12 @@ namespace Assets.Resources.Scripts
             {
                 eCurrentTurn = SharedDataType.EColor.White;
             }
+
+            if(delegateChange != null)
+            {
+                delegateChange(eCurrentTurn);
+            }
+            
 
         }
         //public double GetToPlay(SharedDataType.EColor color)
@@ -945,42 +1007,40 @@ namespace Assets.Resources.Scripts
             int currentColor = (int)eCurrentTurn;
 
 
+
             for (int i = 0; i < 3; ++i)
             {
-                string start_pos = "";
-                if (env.BoardStocks[currentColor, i].Count > 0)
+                if( env.BoardStocks[currentColor, i].Count <= 0 )
                 {
-                    switch (i)
-                    {
-                        //코끼리
-                        case 0:
-                            {
-                                start_pos = "E";
-                                break;
-                            }
-                        //기린
-                        case 1:
-                            {
-                                start_pos = "G";
-                                break;
-                            }
-                        case 2:
-                            {
-                                start_pos = "P";
-                                break;
-                            }
-                    }
+                    continue;
+                }
+                
+                string start_pos = "";
+                switch (i)
+                {
+                    //코끼리
+                    case 0:
+                        {
+                            start_pos = "E";
+                            break;
+                        }
+                    //기린
+                    case 1:
+                        {
+                            start_pos = "G";
+                            break;
+                        }
+                    case 2:
+                        {
+                            start_pos = "P";
+                            break;
+                        }
                 }
 
                 foreach (BoardSlot slot in emptySlot)
                 {
                     //string end_pos = GetStringFromPosition(slot.X, slot.Y);
                     string end_pos = GameManager.intPosToStringPos[(slot.Y, slot.X)];
-
-                    if (start_pos == "")
-                    {
-                        continue;
-                    }
 
                     double action = Decoder.encode_to_action_index(start_pos, end_pos, (double)eCurrentTurn);
                     actions.Add(action, action);
@@ -1072,7 +1132,7 @@ namespace Assets.Resources.Scripts
                 {
                     BoardSlot slot = env.BoardSlots[y, x].GetComponent<BoardSlot>();
 
-                    if (slot.HasPiece() == false)
+                    if (slot.GetPiece() == null)
                     {
                         env.BoardSlots[y, x].SetPermission(false);
                     }
@@ -1088,7 +1148,7 @@ namespace Assets.Resources.Scripts
         {
             BoardSlot targetSlotScript = env.BoardSlots[targetPos_y, targetPos_x];
 
-            if (targetSlotScript.HasPiece() == false)
+            if (targetSlotScript.GetPiece() == null)
             {
                 return true;
             }
@@ -1132,7 +1192,7 @@ namespace Assets.Resources.Scripts
 
                 //피스가 있는가?
                 BoardSlot targetSlotScript = env.BoardSlots[allowed_position[i].Y, allowed_position[i].X];
-                if (targetSlotScript.HasPiece() == false)
+                if (targetSlotScript.GetPiece() == null)
                 {
                     continue;
                 }

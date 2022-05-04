@@ -22,6 +22,8 @@ namespace Assets.Resources.Scripts
 
         public GameObject PermissionObj = null;
 
+        
+
 
         public void Initialize(AnimalRuleManager ruleManager, GameObject permissionObj,  int x, int y)
         {
@@ -44,25 +46,34 @@ namespace Assets.Resources.Scripts
 
         }
 
+        public Piece DetachPiece()
+        {
+            Piece detachPiece = hasPiece;
+            hasPiece = null;
+            return detachPiece;
+        }
+
+        public void DestoryHasPiece()
+        {
+            if(hasPiece == null)
+            {
+                return;
+            }
+
+            Destroy(hasPiece.gameObject);
+            hasPiece = null;
+        }
+
         public void SetPiece(Piece piece)
         {
+            if(hasPiece != null)
+            {
+                DestoryHasPiece();
+            }
+
             hasPiece = piece;
         }
 
-        public bool HasPiece()
-        {
-            if (hasPiece == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-
-            
-            
-        }
 
         public void SetPermission(bool active)
         {

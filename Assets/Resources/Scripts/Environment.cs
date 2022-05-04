@@ -37,8 +37,13 @@ namespace Assets.Resources.Scripts
         public const int X = 3;
         public const int Y = 4;
 
+        int elephant = (int)SharedDataType.EStockType.Elephant;
+        int giraph = (int)SharedDataType.EStockType.Giraph;
+        int chick = (int)SharedDataType.EStockType.Chick;
 
-        
+        int black = (int)SharedDataType.EColor.Black;
+        int white = (int)SharedDataType.EColor.White;
+
 
 
 
@@ -72,6 +77,53 @@ namespace Assets.Resources.Scripts
                 }
             }
         }
+
+        public void ResetEnvironment()
+        {
+            //보드판 초기화
+            for (int y = 0; y < Y; ++y)
+            {
+                for (int x = 0; x < X; ++x)
+                {
+                    //일단 전부 삭제
+                    BoardSlot slot = BoardSlots[y, x].GetComponent<BoardSlot>();
+                    slot.DestoryHasPiece();
+
+
+                    //원래 없는 곳은 곳은 다음
+                    if (BoardManager.InitAnimalBoard[y, x] == 0)
+                    {
+                        continue;
+                    }
+
+                    int pieceID = BoardManager.InitAnimalBoard[y, x];
+
+                    //새로 생성
+                    GameObject pieceObj = PieceManager.instance.CreatePiece(pieceID);
+                    pieceObj.transform.parent = BoardSlots[y, x].transform;
+                    pieceObj.transform.localPosition = Vector3.zero;
+
+                    //슬롯에 넣어줌
+                    Piece piece = pieceObj.GetComponent<Piece>();
+                    slot.SetPiece(piece);
+
+
+                }
+            }
+
+            //스톡판 초기화
+            BoardStocks[black, elephant].SetCount(BoardManager.InitStocks[black, elephant]);
+            BoardStocks[black, giraph].SetCount(BoardManager.InitStocks[black, giraph]);
+            BoardStocks[black, chick].SetCount(BoardManager.InitStocks[black, giraph]);
+
+
+            BoardStocks[white, elephant].SetCount(BoardManager.InitStocks[black, giraph]);
+            BoardStocks[white, giraph].SetCount(BoardManager.InitStocks[black, giraph]);
+            BoardStocks[white, chick].SetCount(BoardManager.InitStocks[black, giraph]);
+
+        }
+
+
 
         public void Initialize(AnimalRuleManager animalRuleManager, Transform parentTransform)
         {
@@ -128,6 +180,10 @@ namespace Assets.Resources.Scripts
             }
             return boardStates;
         }
+
+
+
+
 
         public int[,] GetCurrentStockState()
         {

@@ -82,8 +82,13 @@ namespace Assets.Resources.Scripts
             return PieceScript;
         }
 
-
         public void SetCount(int count)
+        {
+            NumberRenderer.sprite = GameManager.instance.GetSpriteNumber(count);
+            Count = count;
+        }
+
+        public void SetImage(int count)
         {
             NumberRenderer.sprite = GameManager.instance.GetSpriteNumber(count);
         }
@@ -106,7 +111,7 @@ namespace Assets.Resources.Scripts
                 }
 
                 //1 감소
-                SetCount(reducedCount);
+                SetImage(reducedCount);
 
                 ruleManager.SelectStock(this);
             }
@@ -116,7 +121,7 @@ namespace Assets.Resources.Scripts
         private void OnMouseUp()
         {
             ruleManager.InactiveVisualizeMovePath();
-            SetCount(ruleManager.env.BoardStocks[StockID.color, StockID.piece].Count);
+            SetImage(ruleManager.env.BoardStocks[StockID.color, StockID.piece].Count);
 
             ruleManager.DestorySelectedPiece();
 
