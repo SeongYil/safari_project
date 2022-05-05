@@ -243,7 +243,7 @@ MonoBehaviour:
   BlackModel: {fileID: 0}
   WhiteModel: {fileID: 0}
   isTraining: 0
-  EnvironmentCount: 64
+  EnvironmentCount: 50
 --- !u!4 &1044961574
 Transform:
   m_ObjectHideFlags: 0

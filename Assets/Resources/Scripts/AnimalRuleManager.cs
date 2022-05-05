@@ -215,7 +215,6 @@ namespace Assets.Resources.Scripts
                 EndepiosodeState = false;
             }
 
-
             if (Agent[eCurrentTurn].enabled)
             {
 

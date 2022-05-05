@@ -42,17 +42,13 @@ namespace Assets.Resources.Scripts
         private Sprite[] NumberSprite = null;
         private Dictionary<string, Sprite> number_sprite_dictionary = null;
 
-        private Color32 black = new Color32(0, 0, 0, 255);
-        private Color32 white = new Color32(255, 255, 255, 255);
+        public int error = 0;
 
         public bool isTraining = false;
         public int EnvironmentCount = 1;
 
         static public Dictionary<(int y, int x), string> intPosToStringPos = new Dictionary<(int y, int x), string>();
         static public Dictionary<string, (int y, int x)> StringPosToIntPos = new Dictionary<string, (int y, int x)>();
-
-
-        Image TurnImage;
 
         private AnimalRuleManager ControllerEnvrionment = null;
         private void Awake()
@@ -197,7 +193,7 @@ namespace Assets.Resources.Scripts
 
                     if(ReleaseMode)
                     {
-                        ControllerEnvrionment.delegateChange = SetTurnColor;
+                        //ControllerEnvrionment.delegateChange = SetTurnColor;
                     }
                     
 
@@ -209,32 +205,6 @@ namespace Assets.Resources.Scripts
 
         }
 
-        public void SetTurnColor(SharedDataType.EColor eColor)
-        {
-            
-
-            if( eColor ==  SharedDataType.EColor.Black)
-            {
-                TurnImage.color = Color.black;
-            }
-            else
-            {
-                TurnImage.color = Color.white;
-            }
-            
-        }
-
-        //학습용 주석
-        // Update is called once per frame
-        void Update()
-        {
-            if (Input.GetMouseButtonDown(1))
-            {
-                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = false;
-                ControllerEnvrionment.ResetGame();
-                Unity.MLAgents.Academy.Instance.AutomaticSteppingEnabled = true;
-            }
-        }
     }
 
 }

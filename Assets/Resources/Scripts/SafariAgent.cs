@@ -105,9 +105,20 @@ namespace Assets.Resources.Scripts
 		{
 
 
+			
 			int action = actionBuffers.DiscreteActions[0];
+			
+
+			if(action == 0)
+            {
+				//GameManager.instance.eror
+            }
+
 
 			(string start, string dest) pos = Decoder.action_to_stringTuple(action);
+
+
+
 
 			AnimalRuleManager.EGameState actionResult = ruleManager.SetActionMove(pos.start, pos.dest);
 
